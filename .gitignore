@@ -1,0 +1,49 @@
+*.db
+*.docker_build/
+node_modules/*
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+vendor/
+
+
+.envrc.*
+
+# Sveltekit .gitignore
+.idea
+.DS_Store
+.nyc_output
+.vscode
+node_modules
+*.map
+/src/compiler/compile/internal_exports.ts
+/compiler.d.ts
+/compiler.*js
+/index.*js
+/ssr.*js
+/internal
+/store
+/easing
+/motion
+/transition
+/animate
+/scratch/
+/coverage/
+/coverage.lcov
+/test/*/samples/_
+/yarn-error.log
+_actual*.*
+_output
+/types
