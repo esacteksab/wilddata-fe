@@ -4,7 +4,7 @@
 </script>
 
 <nav>
-	<a href="/index.html">Home</a>
+	<a href="/">Home</a>
 	<a href="/orgs">Orgs</a>
 	<a href="/assets">Assets</a>
 </nav>
