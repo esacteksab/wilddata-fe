@@ -3,7 +3,7 @@
 	 * @type {import('@sveltejs/kit').Load}
 	 */
 
-	export async function load({ page, fetch, session, context }) {
+	export async function load({ page, fetch, session }) {
 		const url = `http://localhost:5000/v1/orgs/${page.params.name}`;
 		const res = await fetch(url);
 
@@ -48,11 +48,11 @@
 		@apply max-w-xs;
 	}
 
-	p {
+	/* p {
 		@apply max-w-xs;
 		@apply my-8 mx-auto;
 		@apply leading-snug;
-	}
+	} */
 
     a {
         @apply text-blue-700;
@@ -63,9 +63,9 @@
 			@apply max-w-none;
 		}
 
-		p {
+		/* p {
 			@apply max-w-none;
-		}
+		} */
 	}
 </style>
 
