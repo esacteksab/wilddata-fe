@@ -1,12 +1,14 @@
-<!-- <script lang="ts">
-	// import Counter from '$lib/Counter.svelte';
-</script> -->
-
 <main>
-	<h1>Hello world!</h1>
 
-	<!-- <Counter /> -->
+<div class="container flex flex-wrap mx-auto">
 
-	<p>Visit <a class="text-blue-600 underline" href="https://svelte.dev">svelte.dev</a> to learn how to build Svelte apps.</p>
-	<p>Visit <a class="text-blue-600 underline" href="foo">Foo</a></p>
+<div class="flex flex-row">
+	<div class="basis-1/4"><h1>Hello World!</h1></div>
+</div>
+<div class="flex flex-row">
+	<div><p>Visit <a class="text-blue-600 underline" href="foo">Blah</a></p></div>
+</div>
+	
+</div>
+
 </main>

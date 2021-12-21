@@ -1,13 +1,34 @@
-<script>
-	import "../app.postcss";
-    import '../app.postcss';
+<!-- // __layout.svelte
+
+<script lang="ts">
+  import '../app.css';
+
+  import Header from '$lib/components/Header.svelte';
+  import Login from '$lib/components/Login.svelte';
+  import { auth } from '$lib/auth';
 </script>
 
-<nav>
-	<a href="/">Home</a>
-	<a href="/orgs">Orgs</a>
-	<a href="/assets">Assets</a>
-</nav>
+<main>
+  <Header name={$auth.company?.name} />
+  <div class="max-w-4xl mx-auto py-8">
+    {#if $auth.loading}
+      <div class="text-gray-600">Loading ...</div>
+    {:else if $auth.user}
+      <slot />
+    {:else}
+      <Login />
+    {/if}
+  </div>
+</main> -->
+
+<script>
+	import "../app.postcss";
+	import Header from "$lib/components/Header.svelte";
+</script>
+
+<Header name="Nav" />
+
 
 <slot>
+
 </slot>

@@ -32,5 +32,8 @@
     "typescript": "^4.5.4",
     "vite": "^2.7.3"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@tailwindcss/forms": "^0.3.4"
+  }
 }
