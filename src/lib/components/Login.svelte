@@ -7,7 +7,7 @@
     <div class="mt-8 max-w-md justify-self-center">
       <div class="grid justify-self-center gap-6">
         <label class="block">
-          <span class="text-gray-700">User name</span>
+          <span class="text-orange-500">User name</span>
           <input
             type="text"
             class="
@@ -15,11 +15,11 @@
               block
               w-full
               rounded-md
-              border-orange-900
               shadow-sm
-              focus:border-orange-300 focus:ring focus:ring-orange-200 focus:ring-opacity-50
+              focus:ring-2
+              focus:ring-orange-300
             "
-            placeholder=""
+            placeholder="Username"
           />
         </label>
         <label class="block">
@@ -31,9 +31,12 @@
               block
               w-full
               rounded-md
-              border-gray-300
+
               shadow-sm
-              focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50
+              focus:border-orange-500 
+              focus:ring-2
+              focus:ring-orange-200 
+              focus:ring-opacity-50
             "
             placeholder="user@domain.tld"
           />
