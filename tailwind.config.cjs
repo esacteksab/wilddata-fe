@@ -8,6 +8,7 @@ const config = {
 		colors: {
 			orange: colors.orange,
 			red: colors.red,
+			blue: colors.blue,
 		},
 		extend: {
 			
