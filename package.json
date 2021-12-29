@@ -11,7 +11,7 @@
   "devDependencies": {
     "@babel/core": "^7.16.5",
     "@sveltejs/adapter-node": "^1.0.0-next.56",
-    "@sveltejs/kit": "^1.0.0-next.202",
+    "@sveltejs/kit": "^1.0.0-next.206",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
     "autoprefixer": "^10.4.0",
