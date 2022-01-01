@@ -14,7 +14,16 @@ const config = {
 			
 		},
 	},
-	plugins: [],
+	variants: {
+		extend: {
+			backgroundColor: ['checked', 'unchecked'],
+			borderColor: ['checked', 'unchecked'],
+
+		}
+	},
+	plugins: [
+		require('@tailwindcss/forms'),
+	],
 };
 
 module.exports = config;

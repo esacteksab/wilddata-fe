@@ -31,12 +31,10 @@
               block
               w-full
               rounded-md
-
-              shadow-sm
-              focus:border-orange-500 
+              shadow-sm 
               focus:ring-2
-              focus:ring-orange-200 
-              focus:ring-opacity-50
+              focus:ring-orange-300 
+
             "
             placeholder="user@domain.tld"
           />
@@ -50,10 +48,10 @@
                 block
                 w-full
                 rounded-md
-                border-gray-300
                 shadow-sm
-                focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50
-              "
+                focus:ring-2
+                focus:ring-orange-300
+                "
               placeholder="user@domain.tld"
             />
           </label>
@@ -62,21 +60,24 @@
         <div class="block">
           <div class="mt-2">
             <div>
-              <label class="inline-flex items-center">
+              <label class="inline-flex items-center form-checkbox">
                 <input
                   type="checkbox"
                   class="
+                    appearance-none
                     rounded
-                    border-gray-300
-
+                    border-orange-300
+                    hover:bg-orange-300
+                    hover:checked:bg-orange-300
+                    focus:checked:bg-orange-300
                     shadow-sm
-                    focus:border-orange-300
+                    checked:bg-orange-300
                     focus:ring
                     focus:ring-offset-0
                     focus:ring-orange-200
-                    focus:ring-opacity-50
+
                   "
-                  checked
+                  unchecked
                 />
                 <span class="ml-2">Agree to the terms I didn't read.</span>
               </label>
