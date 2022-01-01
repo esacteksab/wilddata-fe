@@ -56,7 +56,7 @@
 	}
 
 	h1 {
-		@apply text-red-600;
+		@apply text-orange-600;
 		@apply uppercase;
 		@apply text-6xl;
 		@apply font-thin;

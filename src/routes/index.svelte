@@ -6,7 +6,7 @@
 	<div class="basis-1/4"><h1>Hello World!</h1></div>
 </div>
 <div class="flex flex-row">
-	<div><p>Visit <a class="text-blue-600 underline" href="foo">Blah</a></p></div>
+	<div><p>Visit <a class="text-orange-600 underline" href="foo">Blah</a></p></div>
 </div>
 	
 </div>
