@@ -1,6 +1,24 @@
-import { g as get_single_valued_header, r as resolve, i as is_root_relative } from './chunks/url.js';
-import { c as coalesce_to_error } from './chunks/error.js';
-import { s } from './chunks/misc.js';
+/**
+ * @param {Record<string, string | string[]>} headers
+ * @param {string} key
+ * @returns {string | undefined}
+ * @throws {Error}
+ */
+function get_single_valued_header(headers, key) {
+	const value = headers[key];
+	if (Array.isArray(value)) {
+		if (value.length === 0) {
+			return undefined;
+		}
+		if (value.length > 1) {
+			throw new Error(
+				`Multiple headers provided for ${key}. Multiple may be provided only for set-cookie`
+			);
+		}
+		return value[0];
+	}
+	return value;
+}
 
 /** @param {Record<string, any>} obj */
 function lowercase_keys(obj) {
@@ -409,6 +427,17 @@ function writable(value, start = noop) {
 }
 
 /**
+ * @param {unknown} err
+ * @return {Error}
+ */
+function coalesce_to_error(err) {
+	return err instanceof Error ||
+		(err && /** @type {any} */ (err).name && /** @type {any} */ (err).message)
+		? /** @type {Error} */ (err)
+		: new Error(JSON.stringify(err));
+}
+
+/**
  * Hash using djb2
  * @param {import('types/hooks').StrictBody} value
  */
@@ -503,6 +532,8 @@ function escape(str, dict, unicode_encoder) {
 
 	return result;
 }
+
+const s = JSON.stringify;
 
 // TODO rename this function/module
 
@@ -811,6 +842,45 @@ function normalize(loaded) {
 	}
 
 	return /** @type {import('types/internal').NormalizedLoadOutput} */ (loaded);
+}
+
+const absolute = /^([a-z]+:)?\/?\//;
+const scheme = /^[a-z]+:/;
+
+/**
+ * @param {string} base
+ * @param {string} path
+ */
+function resolve(base, path) {
+	if (scheme.test(path)) return path;
+
+	const base_match = absolute.exec(base);
+	const path_match = absolute.exec(path);
+
+	if (!base_match) {
+		throw new Error(`bad base path: "${base}"`);
+	}
+
+	const baseparts = path_match ? [] : base.slice(base_match[0].length).split('/');
+	const pathparts = path_match ? path.slice(path_match[0].length).split('/') : path.split('/');
+
+	baseparts.pop();
+
+	for (let i = 0; i < pathparts.length; i += 1) {
+		const part = pathparts[i];
+		if (part === '.') continue;
+		else if (part === '..') baseparts.pop();
+		else baseparts.push(part);
+	}
+
+	const prefix = (path_match && path_match[0]) || (base_match && base_match[0]) || '';
+
+	return `${prefix}${baseparts.join('/')}`;
+}
+
+/** @param {string} path */
+function is_root_relative(path) {
+	return path[0] === '/' && path[1] !== '/';
 }
 
 /**

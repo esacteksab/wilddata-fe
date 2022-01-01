@@ -195,15 +195,14 @@ class Router {
 	 */
 	parse(url) {
 		if (this.owns(url)) {
-			const path = url.pathname.slice(this.base.length) || '/';
+			const path = decodeURI(url.pathname.slice(this.base.length) || '/');
 
-			const decoded_path = decodeURI(path);
-			const routes = this.routes.filter(([pattern]) => pattern.test(decoded_path));
-
-			const query = new URLSearchParams(url.search);
-			const id = `${path}?${query}`;
-
-			return { id, routes, path, decoded_path, query };
+			return {
+				id: url.pathname + url.search,
+				routes: this.routes.filter(([pattern]) => pattern.test(path)),
+				url,
+				path
+			};
 		}
 	}
 
@@ -273,21 +272,17 @@ class Router {
 		}
 		this.navigating++;
 
-		// remove trailing slashes
-		if (info.path !== '/') {
-			const has_trailing_slash = info.path.endsWith('/');
+		let { pathname } = url;
 
-			const incorrect =
-				(has_trailing_slash && this.trailing_slash === 'never') ||
-				(!has_trailing_slash &&
-					this.trailing_slash === 'always' &&
-					!(info.path.split('/').pop() || '').includes('.'));
-
-			if (incorrect) {
-				info.path = has_trailing_slash ? info.path.slice(0, -1) : info.path + '/';
-				history.replaceState({}, '', `${this.base}${info.path}${location.search}`);
-			}
+		if (this.trailing_slash === 'never') {
+			if (pathname !== '/' && pathname.endsWith('/')) pathname = pathname.slice(0, -1);
+		} else if (this.trailing_slash === 'always') {
+			const is_file = /** @type {string} */ (url.pathname.split('/').pop()).includes('.');
+			if (!is_file && !pathname.endsWith('/')) pathname += '/';
 		}
+
+		info.url = new URL(url.origin + pathname + url.search + url.hash);
+		history.replaceState({}, '', info.url);
 
 		await this.renderer.handle_navigation(info, chain, false, { hash, scroll, keepfocus });
 
@@ -393,13 +388,11 @@ function normalize(loaded) {
 
 /**
  * @typedef {import('types/internal').CSRComponent} CSRComponent
- *
- * @typedef {Partial<import('types/page').Page>} Page
- * @typedef {{ from: Page; to: Page }} Navigating
+ * @typedef {{ from: URL; to: URL }} Navigating
  */
 
 /** @param {any} value */
-function page_store(value) {
+function notifiable_store(value) {
 	const store = writable(value);
 	let ready = true;
 
@@ -457,13 +450,11 @@ class Renderer {
 	 *   fallback: [CSRComponent, CSRComponent];
 	 *   target: Node;
 	 *   session: any;
-	 *   host: string;
 	 * }} opts
 	 */
-	constructor({ Root, fallback, target, session, host }) {
+	constructor({ Root, fallback, target, session }) {
 		this.Root = Root;
 		this.fallback = fallback;
-		this.host = host;
 
 		/** @type {import('./router').Router | undefined} */
 		this.router;
@@ -479,7 +470,7 @@ class Renderer {
 		/** @type {import('./types').NavigationState} */
 		this.current = {
 			// @ts-ignore - we need the initial value to be null
-			page: null,
+			url: null,
 			session_id: 0,
 			branch: []
 		};
@@ -494,7 +485,8 @@ class Renderer {
 		};
 
 		this.stores = {
-			page: page_store({}),
+			url: notifiable_store({}),
+			page: notifiable_store({}),
 			navigating: writable(/** @type {Navigating | null} */ (null)),
 			session: writable(session)
 		};
@@ -521,10 +513,11 @@ class Renderer {
 	 *   status: number;
 	 *   error: Error;
 	 *   nodes: Array<Promise<CSRComponent>>;
-	 *   page: import('types/page').Page;
+	 *   url: URL;
+	 *   params: Record<string, string>;
 	 * }} selected
 	 */
-	async start({ status, error, nodes, page }) {
+	async start({ status, error, nodes, url, params }) {
 		/** @type {Array<import('./types').BranchNode | undefined>} */
 		const branch = [];
 
@@ -542,7 +535,8 @@ class Renderer {
 
 				const node = await this._load_node({
 					module: await nodes[i],
-					page,
+					url,
+					params,
 					stuff,
 					status: is_leaf ? status : undefined,
 					error: is_leaf ? error : undefined
@@ -556,8 +550,7 @@ class Renderer {
 						error_args = {
 							status: node.loaded.status,
 							error: node.loaded.error,
-							path: page.path,
-							query: page.query
+							url
 						};
 					} else if (node.loaded.stuff) {
 						stuff = {
@@ -570,15 +563,14 @@ class Renderer {
 
 			result = error_args
 				? await this._load_error(error_args)
-				: await this._get_navigation_result_from_branch({ page, branch });
+				: await this._get_navigation_result_from_branch({ url, params, branch, status, error });
 		} catch (e) {
 			if (error) throw e;
 
 			result = await this._load_error({
 				status: 500,
 				error: coalesce_to_error(e),
-				path: page.path,
-				query: page.query
+				url
 			});
 		}
 
@@ -601,14 +593,8 @@ class Renderer {
 	async handle_navigation(info, chain, no_cache, opts) {
 		if (this.started) {
 			this.stores.navigating.set({
-				from: {
-					path: this.current.page.path,
-					query: this.current.page.query
-				},
-				to: {
-					path: info.path,
-					query: info.query
-				}
+				from: this.current.url,
+				to: info.url
 			});
 		}
 
@@ -631,18 +617,17 @@ class Renderer {
 		this.invalid.clear();
 
 		if (navigation_result.redirect) {
-			if (chain.length > 10 || chain.includes(info.path)) {
+			if (chain.length > 10 || chain.includes(info.url.pathname)) {
 				navigation_result = await this._load_error({
 					status: 500,
 					error: new Error('Redirect loop'),
-					path: info.path,
-					query: info.query
+					url: info.url
 				});
 			} else {
 				if (this.router) {
 					this.router.goto(navigation_result.redirect, { replaceState: true }, [
 						...chain,
-						info.path
+						info.url.pathname
 					]);
 				} else {
 					location.href = new URL(navigation_result.redirect, location.href).href;
@@ -804,20 +789,22 @@ class Renderer {
 
 		return await this._load_error({
 			status: 404,
-			error: new Error(`Not found: ${info.path}`),
-			path: info.path,
-			query: info.query
+			error: new Error(`Not found: ${info.url.pathname}`),
+			url: info.url
 		});
 	}
 
 	/**
 	 *
 	 * @param {{
-	 *   page: import('types/page').Page;
-	 *   branch: Array<import('./types').BranchNode | undefined>
+	 *   url: URL;
+	 *   params: Record<string, string>;
+	 *   branch: Array<import('./types').BranchNode | undefined>;
+	 *   status: number;
+	 *   error?: Error;
 	 * }} opts
 	 */
-	async _get_navigation_result_from_branch({ page, branch }) {
+	async _get_navigation_result_from_branch({ url, params, branch, status, error }) {
 		const filtered = /** @type {import('./types').BranchNode[] } */ (branch.filter(Boolean));
 		const redirect = filtered.find((f) => f.loaded && f.loaded.redirect);
 
@@ -825,7 +812,8 @@ class Renderer {
 		const result = {
 			redirect: redirect && redirect.loaded ? redirect.loaded.redirect : undefined,
 			state: {
-				page,
+				url,
+				params,
 				branch,
 				session_id: this.session_id
 			},
@@ -839,19 +827,32 @@ class Renderer {
 			result.props[`props_${i}`] = loaded ? await loaded.props : null;
 		}
 
-		if (
-			!this.current.page ||
-			page.path !== this.current.page.path ||
-			page.query.toString() !== this.current.page.query.toString()
-		) {
-			result.props.page = page;
+		if (!this.current.url || url.href !== this.current.url.href) {
+			result.props.page = { url, params, status, error };
+
+			// TODO remove this for 1.0
+			/**
+			 * @param {string} property
+			 * @param {string} replacement
+			 */
+			const print_error = (property, replacement) => {
+				Object.defineProperty(result.props.page, property, {
+					get: () => {
+						throw new Error(`$page.${property} has been replaced by $page.url.${replacement}`);
+					}
+				});
+			};
+
+			print_error('origin', 'origin');
+			print_error('path', 'pathname');
+			print_error('query', 'searchParams');
 		}
 
 		const leaf = filtered[filtered.length - 1];
 		const maxage = leaf.loaded && leaf.loaded.maxage;
 
 		if (maxage) {
-			const key = `${page.path}?${page.query}`;
+			const key = url.pathname + url.search; // omit hash
 			let ready = false;
 
 			const clear = () => {
@@ -882,19 +883,19 @@ class Renderer {
 	 *   status?: number;
 	 *   error?: Error;
 	 *   module: CSRComponent;
-	 *   page: import('types/page').Page;
+	 *   url: URL;
+	 *   params: Record<string, string>;
 	 *   stuff: Record<string, any>;
 	 * }} options
 	 * @returns
 	 */
-	async _load_node({ status, error, module, page, stuff }) {
+	async _load_node({ status, error, module, url, params, stuff }) {
 		/** @type {import('./types').BranchNode} */
 		const node = {
 			module,
 			uses: {
 				params: new Set(),
-				path: false,
-				query: false,
+				url: false,
 				session: false,
 				stuff: false,
 				dependencies: []
@@ -904,12 +905,12 @@ class Renderer {
 		};
 
 		/** @type {Record<string, string>} */
-		const params = {};
-		for (const key in page.params) {
-			Object.defineProperty(params, key, {
+		const uses_params = {};
+		for (const key in params) {
+			Object.defineProperty(uses_params, key, {
 				get() {
 					node.uses.params.add(key);
-					return page.params[key];
+					return params[key];
 				},
 				enumerable: true
 			});
@@ -922,17 +923,10 @@ class Renderer {
 
 			/** @type {import('types/page').LoadInput | import('types/page').ErrorLoadInput} */
 			const load_input = {
-				page: {
-					host: page.host,
-					params,
-					get path() {
-						node.uses.path = true;
-						return page.path;
-					},
-					get query() {
-						node.uses.query = true;
-						return page.query;
-					}
+				params: uses_params,
+				get url() {
+					node.uses.url = true;
+					return url;
 				},
 				get session() {
 					node.uses.session = true;
@@ -943,13 +937,22 @@ class Renderer {
 					return { ...stuff };
 				},
 				fetch(resource, info) {
-					const url = typeof resource === 'string' ? resource : resource.url;
-					const { href } = new URL(url, new URL(page.path, document.baseURI));
+					const requested = typeof resource === 'string' ? resource : resource.url;
+					const { href } = new URL(requested, url);
 					node.uses.dependencies.push(href);
 
 					return started ? fetch(resource, info) : initial_fetch(resource, info);
 				}
 			};
+
+			if (import.meta.env.DEV) {
+				// TODO remove this for 1.0
+				Object.defineProperty(load_input, 'page', {
+					get: () => {
+						throw new Error('`page` in `load` functions has been replaced by `url` and `params`');
+					}
+				});
+			}
 
 			if (error) {
 				/** @type {import('types/page').ErrorLoadInput} */ (load_input).status = status;
@@ -973,8 +976,8 @@ class Renderer {
 	 * @param {boolean} no_cache
 	 * @returns {Promise<import('./types').NavigationResult | undefined>} undefined if fallthrough
 	 */
-	async _load({ route, info: { path, decoded_path, query } }, no_cache) {
-		const key = `${decoded_path}?${query}`;
+	async _load({ route, info: { url, path } }, no_cache) {
+		const key = url.pathname + url.search;
 
 		if (!no_cache) {
 			const cached = this.cache.get(key);
@@ -984,18 +987,14 @@ class Renderer {
 		const [pattern, a, b, get_params] = route;
 		const params = get_params
 			? // the pattern is for the route which we've already matched to this path
-			  get_params(/** @type {RegExpExecArray}  */ (pattern.exec(decoded_path)))
+			  get_params(/** @type {RegExpExecArray}  */ (pattern.exec(path)))
 			: {};
 
-		const changed = this.current.page && {
-			path: path !== this.current.page.path,
-			params: Object.keys(params).filter((key) => this.current.page.params[key] !== params[key]),
-			query: query.toString() !== this.current.page.query.toString(),
+		const changed = this.current.url && {
+			url: key !== this.current.url.pathname + this.current.url.search,
+			params: Object.keys(params).filter((key) => this.current.params[key] !== params[key]),
 			session: this.session_id !== this.current.session_id
 		};
-
-		/** @type {import('types/page').Page} */
-		const page = { host: this.host, path, query, params };
 
 		/** @type {Array<import('./types').BranchNode | undefined>} */
 		let branch = [];
@@ -1026,9 +1025,8 @@ class Renderer {
 				const changed_since_last_render =
 					!previous ||
 					module !== previous.module ||
-					(changed.path && previous.uses.path) ||
+					(changed.url && previous.uses.url) ||
 					changed.params.some((param) => previous.uses.params.has(param)) ||
-					(changed.query && previous.uses.query) ||
 					(changed.session && previous.uses.session) ||
 					previous.uses.dependencies.some((dep) => this.invalid.has(dep)) ||
 					(stuff_changed && previous.uses.stuff);
@@ -1036,7 +1034,8 @@ class Renderer {
 				if (changed_since_last_render) {
 					node = await this._load_node({
 						module,
-						page,
+						url,
+						params,
 						stuff
 					});
 
@@ -1089,7 +1088,8 @@ class Renderer {
 								status,
 								error,
 								module: await b[i](),
-								page,
+								url,
+								params,
 								stuff: node_loaded.stuff
 							});
 
@@ -1108,8 +1108,7 @@ class Renderer {
 				return await this._load_error({
 					status,
 					error,
-					path,
-					query
+					url
 				});
 			} else {
 				if (node && node.loaded && node.loaded.stuff) {
@@ -1123,28 +1122,24 @@ class Renderer {
 			}
 		}
 
-		return await this._get_navigation_result_from_branch({ page, branch });
+		return await this._get_navigation_result_from_branch({ url, params, branch, status, error });
 	}
 
 	/**
 	 * @param {{
-	 *   status?: number;
+	 *   status: number;
 	 *   error: Error;
-	 *   path: string;
-	 *   query: URLSearchParams
+	 *   url: URL;
 	 * }} opts
 	 */
-	async _load_error({ status, error, path, query }) {
-		const page = {
-			host: this.host,
-			path,
-			query,
-			params: {}
-		};
+	async _load_error({ status, error, url }) {
+		/** @type {Record<string, string>} */
+		const params = {}; // error page does not have params
 
 		const node = await this._load_node({
 			module: await this.fallback[0],
-			page,
+			url,
+			params,
 			stuff: {}
 		});
 
@@ -1154,12 +1149,13 @@ class Renderer {
 				status,
 				error,
 				module: await this.fallback[1],
-				page,
+				url,
+				params,
 				stuff: (node && node.loaded && node.loaded.stuff) || {}
 			})
 		];
 
-		return await this._get_navigation_result_from_branch({ page, branch });
+		return await this._get_navigation_result_from_branch({ url, params, branch, status, error });
 	}
 }
 
@@ -1173,7 +1169,6 @@ class Renderer {
  *   },
  *   target: Node;
  *   session: any;
- *   host: string;
  *   route: boolean;
  *   spa: boolean;
  *   trailing_slash: import('types/internal').TrailingSlash;
@@ -1181,11 +1176,12 @@ class Renderer {
  *     status: number;
  *     error: Error;
  *     nodes: Array<Promise<import('types/internal').CSRComponent>>;
- *     page: import('types/page').Page;
+ *     url: URL;
+ *     params: Record<string, string>;
  *   };
  * }} opts
  */
-async function start({ paths, target, session, host, route, spa, trailing_slash, hydrate }) {
+async function start({ paths, target, session, route, spa, trailing_slash, hydrate }) {
 	if (import.meta.env.DEV && !target) {
 		throw new Error('Missing target element. See https://kit.svelte.dev/docs#configuration-target');
 	}
@@ -1194,8 +1190,7 @@ async function start({ paths, target, session, host, route, spa, trailing_slash,
 		Root,
 		fallback,
 		target,
-		session,
-		host
+		session
 	});
 
 	const router = route

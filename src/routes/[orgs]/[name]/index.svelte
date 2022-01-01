@@ -2,10 +2,10 @@
 	/**
 	 * @type {import('@sveltejs/kit').Load}
 	 */
-
-	export async function load({ page, fetch, session }) {
-		const url = `http://localhost:5000/v1/orgs/${page.params.name}`;
-		const res = await fetch(url);
+	export async function load({ params, fetch, session }) {
+		// const orgs = `http://localhost:5000/v1/orgs/${url.params}`;
+		const orgs = `http://localhost:5000/v1/orgs/${params.name}`;
+		const res = await fetch(orgs);
 
         // console.log(url)
 		// console.log(res.json())
@@ -13,7 +13,7 @@
 		if (res.ok) return { props: { org: await res.json()	} };
 		return {
 			status: res.status,
-			error: new Error(`Could not load ${url}`)
+			error: new Error(`Could not load ${orgs}`)
 		};
 	}
 </script>
