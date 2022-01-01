@@ -48,12 +48,6 @@
 		@apply max-w-xs;
 	}
 
-	/* p {
-		@apply max-w-xs;
-		@apply my-8 mx-auto;
-		@apply leading-snug;
-	} */
-
     a {
         @apply text-blue-700;
     }

@@ -1,5 +1,5 @@
-<script>
-    export let header;
+<script lang=ts>
+    export let header
 </script>
 
 

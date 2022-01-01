@@ -26,19 +26,10 @@
 		@apply max-w-xs;
 	}
 
-	p {
-		@apply max-w-xs;
-		@apply my-8 mx-auto;
-		@apply leading-snug;
-	}
-
 	@screen sm {
 		h1 {
 			@apply max-w-none;
 		}
 
-		p {
-			@apply max-w-none;
-		}
 	}
 </style>
