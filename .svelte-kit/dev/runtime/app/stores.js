@@ -2,8 +2,6 @@ import { getContext } from 'svelte';
 import { browser } from './env.js';
 import '../env.js';
 
-const ssr = !browser;
-
 // TODO remove this (for 1.0? after 1.0?)
 let warned = false;
 function stores() {
@@ -59,9 +57,9 @@ const navigating = {
 /** @param {string} verb */
 const throw_error = (verb) => {
 	throw new Error(
-		ssr
-			? `Can only ${verb} session store in browser`
-			: `Cannot ${verb} session store before subscribing`
+		browser
+			? `Cannot ${verb} session store before subscribing`
+			: `Can only ${verb} session store in browser`
 	);
 };
 
@@ -70,7 +68,7 @@ const session = {
 	subscribe(fn) {
 		const store = getStores().session;
 
-		if (!ssr) {
+		if (browser) {
 			session.set = store.set;
 			session.update = store.update;
 		}

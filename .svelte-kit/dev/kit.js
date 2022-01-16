@@ -1,5 +1,5 @@
 /**
- * @param {Record<string, string | string[]>} headers
+ * @param {Record<string, string | string[] | undefined>} headers
  * @param {string} key
  * @returns {string | undefined}
  * @throws {Error}
@@ -68,21 +68,24 @@ function is_string(s) {
 	return typeof s === 'string' || s instanceof String;
 }
 
+const text_types = new Set([
+	'application/xml',
+	'application/json',
+	'application/x-www-form-urlencoded',
+	'multipart/form-data'
+]);
+
 /**
  * Decides how the body should be parsed based on its mime type. Should match what's in parse_body
  *
  * @param {string | undefined | null} content_type The `content-type` header of a request/response.
  * @returns {boolean}
  */
-function is_content_type_textual(content_type) {
+function is_text(content_type) {
 	if (!content_type) return true; // defaults to json
-	const [type] = content_type.split(';'); // get the mime type
-	return (
-		type === 'text/plain' ||
-		type === 'application/json' ||
-		type === 'application/x-www-form-urlencoded' ||
-		type === 'multipart/form-data'
-	);
+	const type = content_type.split(';')[0].toLowerCase(); // get the mime type
+
+	return type.startsWith('text/') || type.endsWith('+xml') || text_types.has(type);
 }
 
 /**
@@ -109,11 +112,12 @@ async function render_endpoint(request, route, match) {
 	const response = await handler(request);
 	const preface = `Invalid response from route ${request.url.pathname}`;
 
-	if (!response) {
-		return;
-	}
 	if (typeof response !== 'object') {
 		return error(`${preface}: expected an object, got ${typeof response}`);
+	}
+
+	if (response.fallthrough) {
+		return;
 	}
 
 	let { status = 200, body, headers = {} } = response;
@@ -121,9 +125,7 @@ async function render_endpoint(request, route, match) {
 	headers = lowercase_keys(headers);
 	const type = get_single_valued_header(headers, 'content-type');
 
-	const is_type_textual = is_content_type_textual(type);
-
-	if (!is_type_textual && !(body instanceof Uint8Array || is_string(body))) {
+	if (!is_text(type) && !(body instanceof Uint8Array || is_string(body))) {
 		return error(
 			`${preface}: body must be an instance of string or Uint8Array if content-type is not a supported textual content-type`
 		);
@@ -535,33 +537,52 @@ function escape(str, dict, unicode_encoder) {
 
 const s = JSON.stringify;
 
+/** @param {URL} url */
+function create_prerendering_url_proxy(url) {
+	return new Proxy(url, {
+		get: (target, prop, receiver) => {
+			if (prop === 'search' || prop === 'searchParams') {
+				throw new Error(`Cannot access url.${prop} on a page with prerendering enabled`);
+			}
+			return Reflect.get(target, prop, receiver);
+		}
+	});
+}
+
 // TODO rename this function/module
 
 /**
  * @param {{
  *   branch: Array<import('./types').Loaded>;
  *   options: import('types/internal').SSRRenderOptions;
+ *   state: import('types/internal').SSRRenderState;
  *   $session: any;
- *   page_config: { hydrate: boolean, router: boolean, ssr: boolean };
+ *   page_config: { hydrate: boolean, router: boolean };
  *   status: number;
- *   error?: Error,
+ *   error?: Error;
  *   url: URL;
- *   params: Record<string, string>
+ *   params: Record<string, string>;
+ *   ssr: boolean;
+ *   stuff: Record<string, any>;
  * }} opts
  */
 async function render_response({
 	branch,
 	options,
+	state,
 	$session,
 	page_config,
 	status,
 	error,
 	url,
-	params
+	params,
+	ssr,
+	stuff
 }) {
 	const css = new Set(options.manifest._.entry.css);
 	const js = new Set(options.manifest._.entry.js);
-	const styles = new Set();
+	/** @type {Map<string, string>} */
+	const styles = new Map();
 
 	/** @type {Array<{ url: string, body: string, json: string }>} */
 	const serialized_data = [];
@@ -575,11 +596,11 @@ async function render_response({
 		error.stack = options.get_stack(error);
 	}
 
-	if (page_config.ssr) {
+	if (ssr) {
 		branch.forEach(({ node, loaded, fetched, uses_credentials }) => {
 			if (node.css) node.css.forEach((url) => css.add(url));
 			if (node.js) node.js.forEach((url) => js.add(url));
-			if (node.styles) node.styles.forEach((content) => styles.add(content));
+			if (node.styles) Object.entries(node.styles).forEach(([k, v]) => styles.set(k, v));
 
 			// TODO probably better if `fetched` wasn't populated unless `hydrate`
 			if (fetched && page_config.hydrate) serialized_data.push(...fetched);
@@ -598,7 +619,13 @@ async function render_response({
 				navigating: writable(null),
 				session
 			},
-			page: { url, params, status, error },
+			page: {
+				url: state.prerender ? create_prerendering_url_proxy(url) : url,
+				params,
+				status,
+				error,
+				stuff
+			},
 			components: branch.map(({ node }) => node.module.default)
 		};
 
@@ -640,94 +667,80 @@ async function render_response({
 		rendered = { head: '', html: '', css: { code: '', map: null } };
 	}
 
-	const include_js = page_config.router || page_config.hydrate;
-	if (!include_js) js.clear();
+	let { head, html: body } = rendered;
 
-	// TODO strip the AMP stuff out of the build if not relevant
-	const links = options.amp
-		? styles.size > 0 || rendered.css.code.length > 0
-			? `<style amp-custom>${Array.from(styles).concat(rendered.css.code).join('\n')}</style>`
-			: ''
-		: [
-				// From https://web.dev/priority-hints/:
-				// Generally, preloads will load in the order the parser gets to them for anything above "Medium" priority
-				// Thus, we should list CSS first
-				...Array.from(css).map((dep) => `<link rel="stylesheet" href="${options.prefix}${dep}">`),
-				...Array.from(js).map((dep) => `<link rel="modulepreload" href="${options.prefix}${dep}">`)
-		  ].join('\n\t\t');
-
-	/** @type {string} */
-	let init = '';
+	const inlined_style = Array.from(styles.values()).join('\n');
 
 	if (options.amp) {
-		init = `
+		head += `
 		<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>
 		<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-		<script async src="https://cdn.ampproject.org/v0.js"></script>`;
-		init += options.service_worker
-			? '<script async custom-element="amp-install-serviceworker" src="https://cdn.ampproject.org/v0/amp-install-serviceworker-0.1.js"></script>'
-			: '';
-	} else if (include_js) {
-		// prettier-ignore
-		init = `<script type="module">
-			import { start } from ${s(options.prefix + options.manifest._.entry.file)};
-			start({
-				target: ${options.target ? `document.querySelector(${s(options.target)})` : 'document.body'},
-				paths: ${s(options.paths)},
-				session: ${try_serialize($session, (error) => {
-					throw new Error(`Failed to serialize session data: ${error.message}`);
-				})},
-				route: ${!!page_config.router},
-				spa: ${!page_config.ssr},
-				trailing_slash: ${s(options.trailing_slash)},
-				hydrate: ${page_config.ssr && page_config.hydrate ? `{
-					status: ${status},
-					error: ${serialize_error(error)},
-					nodes: [
-						${(branch || [])
-						.map(({ node }) => `import(${s(options.prefix + node.entry)})`)
-						.join(',\n\t\t\t\t\t\t')}
-					],
-					url: new URL(${s(url.href)}),
-					params: ${devalue(params)}
-				}` : 'null'}
-			});
-		</script>`;
-	}
+		<script async src="https://cdn.ampproject.org/v0.js"></script>
 
-	if (options.service_worker && !options.amp) {
-		init += `<script>
-			if ('serviceWorker' in navigator) {
-				navigator.serviceWorker.register('${options.service_worker}');
-			}
-		</script>`;
-	}
+		<style amp-custom>${inlined_style}\n${rendered.css.code}</style>`;
 
-	const head = [
-		rendered.head,
-		styles.size && !options.amp
-			? `<style data-svelte>${Array.from(styles).join('\n')}</style>`
-			: '',
-		links,
-		init
-	].join('\n\n\t\t');
-
-	let body = rendered.html;
-	if (options.amp) {
 		if (options.service_worker) {
+			head +=
+				'<script async custom-element="amp-install-serviceworker" src="https://cdn.ampproject.org/v0/amp-install-serviceworker-0.1.js"></script>';
+
 			body += `<amp-install-serviceworker src="${options.service_worker}" layout="nodisplay"></amp-install-serviceworker>`;
 		}
 	} else {
-		body += serialized_data
-			.map(({ url, body, json }) => {
-				let attributes = `type="application/json" data-type="svelte-data" data-url=${escape_html_attr(
-					url
-				)}`;
-				if (body) attributes += ` data-body="${hash(body)}"`;
+		if (inlined_style) {
+			head += `\n\t<style${options.dev ? ' data-svelte' : ''}>${inlined_style}</style>`;
+		}
+		// prettier-ignore
+		head += Array.from(css)
+				.map((dep) => `\n\t<link${styles.has(dep) ? ' disabled' : ''} rel="stylesheet" href="${options.prefix + dep}">`)
+				.join('');
 
-				return `<script ${attributes}>${json}</script>`;
-			})
-			.join('\n\n\t');
+		if (page_config.router || page_config.hydrate) {
+			head += Array.from(js)
+				.map((dep) => `\n\t<link rel="modulepreload" href="${options.prefix + dep}">`)
+				.join('');
+			// prettier-ignore
+			head += `
+			<script type="module">
+				import { start } from ${s(options.prefix + options.manifest._.entry.file)};
+				start({
+					target: ${options.target ? `document.querySelector(${s(options.target)})` : 'document.body'},
+					paths: ${s(options.paths)},
+					session: ${try_serialize($session, (error) => {
+						throw new Error(`Failed to serialize session data: ${error.message}`);
+					})},
+					route: ${!!page_config.router},
+					spa: ${!ssr},
+					trailing_slash: ${s(options.trailing_slash)},
+					hydrate: ${ssr && page_config.hydrate ? `{
+						status: ${status},
+						error: ${serialize_error(error)},
+						nodes: [
+							${(branch || [])
+							.map(({ node }) => `import(${s(options.prefix + node.entry)})`)
+							.join(',\n\t\t\t\t\t\t')}
+						],
+						url: new URL(${s(url.href)}),
+						params: ${devalue(params)}
+					}` : 'null'}
+				});
+			</script>${options.service_worker ? `
+			<script>
+				if ('serviceWorker' in navigator) {
+					navigator.serviceWorker.register('${options.service_worker}');
+				}
+			</script>` : ''}`;
+
+			body += serialized_data
+				.map(({ url, body, json }) => {
+					let attributes = `type="application/json" data-type="svelte-data" data-url=${escape_html_attr(
+						url
+					)}`;
+					if (body) attributes += ` data-body="${hash(body)}"`;
+
+					return `<script ${attributes}>${json}</script>`;
+				})
+				.join('\n\n\t');
+		}
 	}
 
 	/** @type {import('types/helper').ResponseHeaders} */
@@ -743,10 +756,18 @@ async function render_response({
 		headers['permissions-policy'] = 'interest-cohort=()';
 	}
 
+	const segments = url.pathname.slice(options.paths.base.length).split('/').slice(2);
+	const assets =
+		options.paths.assets || (segments.length > 0 ? segments.map(() => '..').join('/') : '.');
+
 	return {
 		status,
 		headers,
-		body: options.template({ head, body })
+		body: options.template({
+			head,
+			body,
+			assets
+		})
 	};
 }
 
@@ -894,8 +915,6 @@ function is_root_relative(path) {
  *   node: import('types/internal').SSRNode;
  *   $session: any;
  *   stuff: Record<string, any>;
- *   prerender_enabled: boolean;
- *   is_leaf: boolean;
  *   is_error: boolean;
  *   status?: number;
  *   error?: Error;
@@ -912,8 +931,6 @@ async function load_node({
 	node,
 	$session,
 	stuff,
-	prerender_enabled,
-	is_leaf,
 	is_error,
 	status,
 	error
@@ -938,19 +955,10 @@ async function load_node({
 
 	let loaded;
 
-	const url_proxy = new Proxy(url, {
-		get: (target, prop, receiver) => {
-			if (prerender_enabled && (prop === 'search' || prop === 'searchParams')) {
-				throw new Error('Cannot access query on a page with prerendering enabled');
-			}
-			return Reflect.get(target, prop, receiver);
-		}
-	});
-
 	if (module.load) {
 		/** @type {import('types/page').LoadInput | import('types/page').ErrorLoadInput} */
 		const load_input = {
-			url: url_proxy,
+			url: state.prerender ? create_prerendering_url_proxy(url) : url,
 			params,
 			get session() {
 				uses_credentials = true;
@@ -1173,16 +1181,16 @@ async function load_node({
 		}
 
 		loaded = await module.load.call(null, load_input);
+
+		if (!loaded) {
+			throw new Error(`load function must return a value${options.dev ? ` (${node.entry})` : ''}`);
+		}
 	} else {
 		loaded = {};
 	}
 
-	// if leaf node (i.e. page component) has a load function
-	// that returns nothing, we fall through to the next one
-	if (!loaded && is_leaf && !is_error) return;
-
-	if (!loaded) {
-		throw new Error(`${node.entry} - load must return a value except for page fall through`);
+	if (loaded.fallthrough && !is_error) {
+		return;
 	}
 
 	return {
@@ -1197,7 +1205,6 @@ async function load_node({
 
 /**
  * @typedef {import('./types.js').Loaded} Loaded
- * @typedef {import('types/internal').SSRNode} SSRNode
  * @typedef {import('types/internal').SSRRenderOptions} SSRRenderOptions
  * @typedef {import('types/internal').SSRRenderState} SSRRenderState
  */
@@ -1210,36 +1217,41 @@ async function load_node({
  *   $session: any;
  *   status: number;
  *   error: Error;
+ *   ssr: boolean;
  * }} opts
  */
-async function respond_with_error({ request, options, state, $session, status, error }) {
-	const default_layout = await options.manifest._.nodes[0](); // 0 is always the root layout
-	const default_error = await options.manifest._.nodes[1](); // 1 is always the root error
+async function respond_with_error({
+	request,
+	options,
+	state,
+	$session,
+	status,
+	error,
+	ssr
+}) {
+	try {
+		const default_layout = await options.manifest._.nodes[0](); // 0 is always the root layout
+		const default_error = await options.manifest._.nodes[1](); // 1 is always the root error
 
-	/** @type {Record<string, string>} */
-	const params = {}; // error page has no params
+		/** @type {Record<string, string>} */
+		const params = {}; // error page has no params
 
-	// error pages don't fall through, so we know it's not undefined
-	const loaded = /** @type {Loaded} */ (
-		await load_node({
-			request,
-			options,
-			state,
-			route: null,
-			url: request.url, // TODO this is redundant, no?
-			params,
-			node: default_layout,
-			$session,
-			stuff: {},
-			prerender_enabled: is_prerender_enabled(options, default_error, state),
-			is_leaf: false,
-			is_error: false
-		})
-	);
+		const layout_loaded = /** @type {Loaded} */ (
+			await load_node({
+				request,
+				options,
+				state,
+				route: null,
+				url: request.url, // TODO this is redundant, no?
+				params,
+				node: default_layout,
+				$session,
+				stuff: {},
+				is_error: false
+			})
+		);
 
-	const branch = [
-		loaded,
-		/** @type {Loaded} */ (
+		const error_loaded = /** @type {Loaded} */ (
 			await load_node({
 				request,
 				options,
@@ -1249,30 +1261,28 @@ async function respond_with_error({ request, options, state, $session, status, e
 				params,
 				node: default_error,
 				$session,
-				stuff: loaded ? loaded.stuff : {},
-				prerender_enabled: is_prerender_enabled(options, default_error, state),
-				is_leaf: false,
+				stuff: layout_loaded ? layout_loaded.stuff : {},
 				is_error: true,
 				status,
 				error
 			})
-		)
-	];
+		);
 
-	try {
 		return await render_response({
 			options,
+			state,
 			$session,
 			page_config: {
 				hydrate: options.hydrate,
-				router: options.router,
-				ssr: options.ssr
+				router: options.router
 			},
+			stuff: error_loaded.stuff,
 			status,
 			error,
-			branch,
+			branch: [layout_loaded, error_loaded],
 			url: request.url,
-			params
+			params,
+			ssr
 		});
 	} catch (err) {
 		const error = coalesce_to_error(err);
@@ -1285,17 +1295,6 @@ async function respond_with_error({ request, options, state, $session, status, e
 			body: error.stack
 		};
 	}
-}
-
-/**
- * @param {SSRRenderOptions} options
- * @param {SSRNode} node
- * @param {SSRRenderState} state
- */
-function is_prerender_enabled(options, node, state) {
-	return (
-		options.prerender && (!!node.module.prerender || (!!state.prerender && state.prerender.all))
-	);
 }
 
 /**
@@ -1314,14 +1313,29 @@ function is_prerender_enabled(options, node, state) {
  *   $session: any;
  *   route: import('types/internal').SSRPage;
  *   params: Record<string, string>;
+ *   ssr: boolean;
  * }} opts
  * @returns {Promise<ServerResponse | undefined>}
  */
 async function respond$1(opts) {
-	const { request, options, state, $session, route } = opts;
+	const { request, options, state, $session, route, ssr } = opts;
 
 	/** @type {Array<SSRNode | undefined>} */
 	let nodes;
+
+	if (!ssr) {
+		return await render_response({
+			...opts,
+			branch: [],
+			page_config: {
+				hydrate: true,
+				router: true
+			},
+			status: 200,
+			url: request.url,
+			stuff: {}
+		});
+	}
 
 	try {
 		nodes = await Promise.all(
@@ -1338,7 +1352,8 @@ async function respond$1(opts) {
 			state,
 			$session,
 			status: 500,
-			error
+			error,
+			ssr
 		});
 	}
 
@@ -1368,9 +1383,9 @@ async function respond$1(opts) {
 	/** @type {string[]} */
 	let set_cookie_headers = [];
 
-	ssr: if (page_config.ssr) {
-		let stuff = {};
+	let stuff = {};
 
+	ssr: if (ssr) {
 		for (let i = 0; i < nodes.length; i += 1) {
 			const node = nodes[i];
 
@@ -1384,8 +1399,6 @@ async function respond$1(opts) {
 						url: request.url,
 						node,
 						stuff,
-						prerender_enabled: is_prerender_enabled(options, node, state),
-						is_leaf: i === nodes.length - 1,
 						is_error: false
 					});
 
@@ -1434,15 +1447,12 @@ async function respond$1(opts) {
 							}
 
 							try {
-								// there's no fallthough on an error page, so we know it's not undefined
 								const error_loaded = /** @type {import('./types').Loaded} */ (
 									await load_node({
 										...opts,
 										url: request.url,
 										node: error_node,
 										stuff: node_loaded.stuff,
-										prerender_enabled: is_prerender_enabled(options, error_node, state),
-										is_leaf: false,
 										is_error: true,
 										status,
 										error
@@ -1455,6 +1465,7 @@ async function respond$1(opts) {
 
 								page_config = get_page_config(error_node.module, options);
 								branch = branch.slice(0, j + 1).concat(error_loaded);
+								stuff = { ...node_loaded.stuff, ...error_loaded.stuff };
 								break ssr;
 							} catch (err) {
 								const e = coalesce_to_error(err);
@@ -1476,7 +1487,8 @@ async function respond$1(opts) {
 							state,
 							$session,
 							status,
-							error
+							error,
+							ssr
 						}),
 						set_cookie_headers
 					);
@@ -1496,6 +1508,7 @@ async function respond$1(opts) {
 		return with_cookies(
 			await render_response({
 				...opts,
+				stuff,
 				url: request.url,
 				page_config,
 				status,
@@ -1525,8 +1538,14 @@ async function respond$1(opts) {
  * @param {SSRRenderOptions} options
  */
 function get_page_config(leaf, options) {
+	// TODO remove for 1.0
+	if ('ssr' in leaf) {
+		throw new Error(
+			'`export const ssr` has been removed — use the handle hook instead: https://kit.svelte.dev/docs#hooks-handle'
+		);
+	}
+
 	return {
-		ssr: 'ssr' in leaf ? !!leaf.ssr : options.ssr,
 		router: 'router' in leaf ? !!leaf.router : options.router,
 		hydrate: 'hydrate' in leaf ? !!leaf.hydrate : options.hydrate
 	};
@@ -1549,9 +1568,10 @@ function with_cookies(response, set_cookie_headers) {
  * @param {RegExpExecArray} match
  * @param {import('types/internal').SSRRenderOptions} options
  * @param {import('types/internal').SSRRenderState} state
+ * @param {boolean} ssr
  * @returns {Promise<import('types/hooks').ServerResponse | undefined>}
  */
-async function render_page(request, route, match, options, state) {
+async function render_page(request, route, match, options, state, ssr) {
 	if (state.initiator === route) {
 		// infinite request cycle detected
 		return {
@@ -1571,7 +1591,8 @@ async function render_page(request, route, match, options, state) {
 		state,
 		$session,
 		route,
-		params
+		params,
+		ssr
 	});
 
 	if (response) {
@@ -1601,8 +1622,9 @@ function read_only_form_data() {
 		 * @param {string} value
 		 */
 		append(key, value) {
-			if (map.has(key)) {
-				(map.get(key) || []).push(value);
+			const existing_values = map.get(key);
+			if (existing_values) {
+				existing_values.push(value);
 			} else {
 				map.set(key, [value]);
 			}
@@ -1624,12 +1646,15 @@ class ReadOnlyFormData {
 	/** @param {string} key */
 	get(key) {
 		const value = this.#map.get(key);
-		return value && value[0];
+		if (!value) {
+			return null;
+		}
+		return value[0];
 	}
 
 	/** @param {string} key */
 	getAll(key) {
-		return this.#map.get(key);
+		return this.#map.get(key) || [];
 	}
 
 	/** @param {string} key */
@@ -1809,6 +1834,28 @@ async function respond(incoming, options, state = {}) {
 		locals: {}
 	};
 
+	const { parameter, allowed } = options.method_override;
+	const method_override = incoming.url.searchParams.get(parameter)?.toUpperCase();
+
+	if (method_override) {
+		if (request.method.toUpperCase() === 'POST') {
+			if (allowed.includes(method_override)) {
+				request.method = method_override;
+			} else {
+				const verb = allowed.length === 0 ? 'enabled' : 'allowed';
+				const body = `${parameter}=${method_override} is not ${verb}. See https://kit.svelte.dev/docs#configuration-methodoverride`;
+
+				return {
+					status: 400,
+					headers: {},
+					body
+				};
+			}
+		} else {
+			throw new Error(`${parameter}=${method_override} is only allowed with POST requests`);
+		}
+	}
+
 	// TODO remove this for 1.0
 	/**
 	 * @param {string} property
@@ -1826,19 +1873,26 @@ async function respond(incoming, options, state = {}) {
 	print_error('path', 'pathname');
 	print_error('query', 'searchParams');
 
+	let ssr = true;
+
 	try {
 		return await options.hooks.handle({
 			request,
-			resolve: async (request) => {
+			resolve: async (request, opts) => {
+				if (opts && 'ssr' in opts) ssr = /** @type {boolean} */ (opts.ssr);
+
 				if (state.prerender && state.prerender.fallback) {
 					return await render_response({
 						url: request.url,
 						params: request.params,
 						options,
+						state,
 						$session: await options.hooks.getSession(request),
-						page_config: { ssr: false, router: true, hydrate: true },
+						page_config: { router: true, hydrate: true },
+						stuff: {},
 						status: 200,
-						branch: []
+						branch: [],
+						ssr: false
 					});
 				}
 
@@ -1851,7 +1905,7 @@ async function respond(incoming, options, state = {}) {
 					const response =
 						route.type === 'endpoint'
 							? await render_endpoint(request, route, match)
-							: await render_page(request, route, match, options, state);
+							: await render_page(request, route, match, options, state, ssr);
 
 					if (response) {
 						// inject ETags for 200 responses
@@ -1867,9 +1921,25 @@ async function respond(incoming, options, state = {}) {
 								const etag = `"${hash(response.body || '')}"`;
 
 								if (if_none_match_value === etag) {
+									/** @type {import('types/helper').ResponseHeaders} */
+									const headers = { etag };
+
+									// https://datatracker.ietf.org/doc/html/rfc7232#section-4.1
+									for (const key of [
+										'cache-control',
+										'content-location',
+										'date',
+										'expires',
+										'vary'
+									]) {
+										if (key in response.headers) {
+											headers[key] = /** @type {string} */ (response.headers[key]);
+										}
+									}
+
 									return {
 										status: 304,
-										headers: {}
+										headers
 									};
 								}
 
@@ -1891,21 +1961,37 @@ async function respond(incoming, options, state = {}) {
 						state,
 						$session,
 						status: 404,
-						error: new Error(`Not found: ${request.url.pathname}`)
+						error: new Error(`Not found: ${request.url.pathname}`),
+						ssr
 					});
 				}
 			}
 		});
-	} catch (/** @type {unknown} */ err) {
-		const e = coalesce_to_error(err);
+	} catch (/** @type {unknown} */ e) {
+		const error = coalesce_to_error(e);
 
-		options.handle_error(e, request);
+		options.handle_error(error, request);
 
-		return {
-			status: 500,
-			headers: {},
-			body: options.dev ? e.stack : e.message
-		};
+		try {
+			const $session = await options.hooks.getSession(request);
+			return await respond_with_error({
+				request,
+				options,
+				state,
+				$session,
+				status: 500,
+				error,
+				ssr
+			});
+		} catch (/** @type {unknown} */ e) {
+			const error = coalesce_to_error(e);
+
+			return {
+				status: 500,
+				headers: {},
+				body: options.dev ? error.stack : error.message
+			};
+		}
 	}
 }
 

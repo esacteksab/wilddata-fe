@@ -1,5 +1,6 @@
 import Root from '../../generated/root.svelte';
 import { fallback, routes } from '../../generated/manifest.js';
+import { onMount, tick } from 'svelte';
 import { g as get_base_uri } from '../chunks/utils.js';
 import { writable } from 'svelte/store';
 import { init } from './singletons.js';
@@ -58,8 +59,21 @@ class Router {
 		// make it possible to reset focus
 		document.body.setAttribute('tabindex', '-1');
 
-		// create initial history entry, so we can return here
-		history.replaceState(history.state || {}, '', location.href);
+		// keeping track of the history index in order to prevent popstate navigation events if needed
+		this.current_history_index = history.state?.['sveltekit:index'] ?? 0;
+
+		if (this.current_history_index === 0) {
+			// create initial history entry, so we can return here
+			history.replaceState({ ...history.state, 'sveltekit:index': 0 }, '', location.href);
+		}
+
+		this.callbacks = {
+			/** @type {Array<({ from, to, cancel }: { from: URL, to: URL | null, cancel: () => void }) => void>} */
+			before_navigate: [],
+
+			/** @type {Array<({ from, to }: { from: URL | null, to: URL }) => void>} */
+			after_navigate: []
+		};
 	}
 
 	init_listeners() {
@@ -71,8 +85,23 @@ class Router {
 		// Reset scrollRestoration to auto when leaving page, allowing page reload
 		// and back-navigation from other pages to use the browser to restore the
 		// scrolling position.
-		addEventListener('beforeunload', () => {
-			history.scrollRestoration = 'auto';
+		addEventListener('beforeunload', (e) => {
+			let should_block = false;
+
+			const intent = {
+				from: this.renderer.current.url,
+				to: null,
+				cancel: () => (should_block = true)
+			};
+
+			this.callbacks.before_navigate.forEach((fn) => fn(intent));
+
+			if (should_block) {
+				e.preventDefault();
+				e.returnValue = '';
+			} else {
+				history.scrollRestoration = 'auto';
+			}
 		});
 
 		// Setting scrollRestoration to manual again when returning to this page.
@@ -127,7 +156,7 @@ class Router {
 		addEventListener('sveltekit:trigger_prefetch', trigger_prefetch);
 
 		/** @param {MouseEvent} event */
-		addEventListener('click', (event) => {
+		addEventListener('click', async (event) => {
 			if (!this.enabled) return;
 
 			// Adapted from https://github.com/visionmedia/page.js
@@ -160,31 +189,60 @@ class Router {
 			// Ignore if <a> has a target
 			if (a instanceof SVGAElement ? a.target.baseVal : a.target) return;
 
-			if (!this.owns(url)) return;
-
-			const noscroll = a.hasAttribute('sveltekit:noscroll');
-
-			const i1 = url_string.indexOf('#');
-			const i2 = location.href.indexOf('#');
-			const u1 = i1 >= 0 ? url_string.substring(0, i1) : url_string;
-			const u2 = i2 >= 0 ? location.href.substring(0, i2) : location.href;
-			history.pushState({}, '', url.href);
-			if (u1 === u2) {
-				window.dispatchEvent(new HashChangeEvent('hashchange'));
+			// Check if new url only differs by hash
+			if (url.href.split('#')[0] === location.href.split('#')[0]) {
+				// Call `pushState` to add url to history so going back works.
+				// Also make a delay, otherwise the browser default behaviour would not kick in
+				setTimeout(() => history.pushState({}, '', url.href));
+				const info = this.parse(url);
+				if (info) {
+					return this.renderer.update(info, [], false);
+				}
+				return;
 			}
-			this._navigate(url, noscroll ? scroll_state() : null, false, [], url.hash);
-			event.preventDefault();
+
+			this._navigate({
+				url,
+				scroll: a.hasAttribute('sveltekit:noscroll') ? scroll_state() : null,
+				keepfocus: false,
+				chain: [],
+				details: {
+					state: {},
+					replaceState: false
+				},
+				accepted: () => event.preventDefault(),
+				blocked: () => event.preventDefault()
+			});
 		});
 
 		addEventListener('popstate', (event) => {
 			if (event.state && this.enabled) {
-				const url = new URL(location.href);
-				this._navigate(url, event.state['sveltekit:scroll'], false, []);
+				// if a popstate-driven navigation is cancelled, we need to counteract it
+				// with history.go, which means we end up back here, hence this check
+				if (event.state['sveltekit:index'] === this.current_history_index) return;
+
+				this._navigate({
+					url: new URL(location.href),
+					scroll: event.state['sveltekit:scroll'],
+					keepfocus: false,
+					chain: [],
+					details: null,
+					accepted: () => {
+						this.current_history_index = event.state['sveltekit:index'];
+					},
+					blocked: () => {
+						const delta = this.current_history_index - event.state['sveltekit:index'];
+						history.go(delta);
+					}
+				});
 			}
 		});
 	}
 
-	/** @param {URL} url */
+	/**
+	 * Returns true if `url` has the same origin and basepath as the app
+	 * @param {URL} url
+	 */
 	owns(url) {
 		return url.origin === location.origin && url.pathname.startsWith(this.base);
 	}
@@ -220,9 +278,19 @@ class Router {
 	) {
 		const url = new URL(href, get_base_uri(document));
 
-		if (this.enabled && this.owns(url)) {
-			history[replaceState ? 'replaceState' : 'pushState'](state, '', href);
-			return this._navigate(url, noscroll ? scroll_state() : null, keepfocus, chain, url.hash);
+		if (this.enabled) {
+			return this._navigate({
+				url,
+				scroll: noscroll ? scroll_state() : null,
+				keepfocus,
+				chain,
+				details: {
+					state,
+					replaceState
+				},
+				accepted: () => {},
+				blocked: () => {}
+			});
 		}
 
 		location.href = url.href;
@@ -253,19 +321,72 @@ class Router {
 		return this.renderer.load(info);
 	}
 
-	/**
-	 * @param {URL} url
-	 * @param {{ x: number, y: number }?} scroll
-	 * @param {boolean} keepfocus
-	 * @param {string[]} chain
-	 * @param {string} [hash]
-	 */
-	async _navigate(url, scroll, keepfocus, chain, hash) {
-		const info = this.parse(url);
+	/** @param {({ from, to }: { from: URL | null, to: URL }) => void} fn */
+	after_navigate(fn) {
+		onMount(() => {
+			this.callbacks.after_navigate.push(fn);
 
-		if (!info) {
-			throw new Error('Attempted to navigate to a URL that does not belong to this app');
+			return () => {
+				const i = this.callbacks.after_navigate.indexOf(fn);
+				this.callbacks.after_navigate.splice(i, 1);
+			};
+		});
+	}
+
+	/**
+	 * @param {({ from, to, cancel }: { from: URL, to: URL | null, cancel: () => void }) => void} fn
+	 */
+	before_navigate(fn) {
+		onMount(() => {
+			this.callbacks.before_navigate.push(fn);
+
+			return () => {
+				const i = this.callbacks.before_navigate.indexOf(fn);
+				this.callbacks.before_navigate.splice(i, 1);
+			};
+		});
+	}
+
+	/**
+	 * @param {{
+	 *   url: URL;
+	 *   scroll: { x: number, y: number } | null;
+	 *   keepfocus: boolean;
+	 *   chain: string[];
+	 *   details: {
+	 *     replaceState: boolean;
+	 *     state: any;
+	 *   } | null;
+	 *   accepted: () => void;
+	 *   blocked: () => void;
+	 * }} opts
+	 */
+	async _navigate({ url, scroll, keepfocus, chain, details, accepted, blocked }) {
+		const from = this.renderer.current.url;
+		let should_block = false;
+
+		const intent = {
+			from,
+			to: url,
+			cancel: () => (should_block = true)
+		};
+
+		this.callbacks.before_navigate.forEach((fn) => fn(intent));
+
+		if (should_block) {
+			blocked();
+			return;
 		}
+
+		const info = this.parse(url);
+		if (!info) {
+			location.href = url.href;
+			return new Promise(() => {
+				// never resolves
+			});
+		}
+
+		accepted();
 
 		if (!this.navigating) {
 			dispatchEvent(new CustomEvent('sveltekit:navigation-start'));
@@ -282,13 +403,24 @@ class Router {
 		}
 
 		info.url = new URL(url.origin + pathname + url.search + url.hash);
-		history.replaceState({}, '', info.url);
 
-		await this.renderer.handle_navigation(info, chain, false, { hash, scroll, keepfocus });
+		if (details) {
+			const change = details.replaceState ? 0 : 1;
+			details.state['sveltekit:index'] = this.current_history_index += change;
+			history[details.replaceState ? 'replaceState' : 'pushState'](details.state, '', info.url);
+		}
+
+		await this.renderer.handle_navigation(info, chain, false, {
+			scroll,
+			keepfocus
+		});
 
 		this.navigating--;
 		if (!this.navigating) {
 			dispatchEvent(new CustomEvent('sveltekit:navigation-end'));
+
+			const navigation = { from, to: url };
+			this.callbacks.after_navigate.forEach((fn) => fn(navigation));
 		}
 	}
 }
@@ -466,6 +598,8 @@ class Renderer {
 		this.session_id = 1;
 		this.invalid = new Set();
 		this.invalidating = null;
+		this.autoscroll = true;
+		this.updating = false;
 
 		/** @type {import('./types').NavigationState} */
 		this.current = {
@@ -508,6 +642,16 @@ class Renderer {
 		ready = true;
 	}
 
+	disable_scroll_handling() {
+		if (import.meta.env.DEV && this.started && !this.updating) {
+			throw new Error('Can only disable scroll handling during navigation');
+		}
+
+		if (this.updating || !this.started) {
+			this.autoscroll = false;
+		}
+	}
+
 	/**
 	 * @param {{
 	 *   status: number;
@@ -528,6 +672,9 @@ class Renderer {
 		let result;
 
 		let error_args;
+
+		// url.hash is empty when coming from the server
+		url.hash = window.location.hash;
 
 		try {
 			for (let i = 0; i < nodes.length; i += 1) {
@@ -563,7 +710,14 @@ class Renderer {
 
 			result = error_args
 				? await this._load_error(error_args)
-				: await this._get_navigation_result_from_branch({ url, params, branch, status, error });
+				: await this._get_navigation_result_from_branch({
+						url,
+						params,
+						stuff,
+						branch,
+						status,
+						error
+				  });
 		} catch (e) {
 			if (error) throw e;
 
@@ -625,10 +779,11 @@ class Renderer {
 				});
 			} else {
 				if (this.router) {
-					this.router.goto(navigation_result.redirect, { replaceState: true }, [
-						...chain,
-						info.url.pathname
-					]);
+					this.router.goto(
+						new URL(navigation_result.redirect, info.url).href,
+						{ replaceState: true },
+						[...chain, info.url.pathname]
+					);
 				} else {
 					location.href = new URL(navigation_result.redirect, location.href).href;
 				}
@@ -636,6 +791,8 @@ class Renderer {
 				return;
 			}
 		}
+
+		this.updating = true;
 
 		if (this.started) {
 			this.current = navigation_result.state;
@@ -646,36 +803,20 @@ class Renderer {
 			this._init(navigation_result);
 		}
 
-		// opts must be passed if we're navigating...
+		// opts must be passed if we're navigating
 		if (opts) {
-			const { hash, scroll, keepfocus } = opts;
+			const { scroll, keepfocus } = opts;
 
 			if (!keepfocus) {
 				getSelection()?.removeAllRanges();
 				document.body.focus();
 			}
 
-			const old_page_y_offset = Math.round(pageYOffset);
-			const old_max_page_y_offset = document.documentElement.scrollHeight - innerHeight;
+			// need to render the DOM before we can scroll to the rendered elements
+			await tick();
 
-			await 0;
-
-			const new_page_y_offset = Math.round(pageYOffset);
-			const new_max_page_y_offset = document.documentElement.scrollHeight - innerHeight;
-
-			// After `await 0`, the `onMount()` function in the component executed.
-			// Check if no scrolling happened on mount.
-			const no_scroll_happened =
-				// In most cases, we can compare whether `pageYOffset` changed between navigation
-				new_page_y_offset === Math.min(old_page_y_offset, new_max_page_y_offset) ||
-				// But if the page is scrolled to/near the bottom, the browser would also scroll
-				// to/near the bottom of the new page on navigation. Since we can't detect when this
-				// behaviour happens, we naively compare by the y offset from the bottom of the page.
-				old_max_page_y_offset - old_page_y_offset === new_max_page_y_offset - new_page_y_offset;
-
-			// If there was no scrolling, we run on our custom scroll handling
-			if (no_scroll_happened) {
-				const deep_linked = hash && document.getElementById(hash.slice(1));
+			if (this.autoscroll) {
+				const deep_linked = info.url.hash && document.getElementById(info.url.hash.slice(1));
 				if (scroll) {
 					scrollTo(scroll.x, scroll.y);
 				} else if (deep_linked) {
@@ -688,12 +829,14 @@ class Renderer {
 				}
 			}
 		} else {
-			// ...they will not be supplied if we're simply invalidating
-			await 0;
+			// in this case we're simply invalidating
+			await tick();
 		}
 
 		this.loading.promise = null;
 		this.loading.id = null;
+		this.autoscroll = true;
+		this.updating = false;
 
 		if (!this.router) return;
 
@@ -749,6 +892,11 @@ class Renderer {
 		});
 
 		this.started = true;
+
+		if (this.router) {
+			const navigation = { from: null, to: new URL(location.href) };
+			this.router.callbacks.after_navigate.forEach((fn) => fn(navigation));
+		}
 	}
 
 	/**
@@ -799,12 +947,13 @@ class Renderer {
 	 * @param {{
 	 *   url: URL;
 	 *   params: Record<string, string>;
+	 *   stuff: Record<string, any>;
 	 *   branch: Array<import('./types').BranchNode | undefined>;
 	 *   status: number;
 	 *   error?: Error;
 	 * }} opts
 	 */
-	async _get_navigation_result_from_branch({ url, params, branch, status, error }) {
+	async _get_navigation_result_from_branch({ url, params, stuff, branch, status, error }) {
 		const filtered = /** @type {import('./types').BranchNode[] } */ (branch.filter(Boolean));
 		const redirect = filtered.find((f) => f.loaded && f.loaded.redirect);
 
@@ -828,7 +977,7 @@ class Renderer {
 		}
 
 		if (!this.current.url || url.href !== this.current.url.href) {
-			result.props.page = { url, params, status, error };
+			result.props.page = { url, params, status, error, stuff };
 
 			// TODO remove this for 1.0
 			/**
@@ -961,8 +1110,9 @@ class Renderer {
 
 			const loaded = await module.load.call(null, load_input);
 
-			// if the page component returns nothing from load, fall through
-			if (!loaded) return;
+			if (!loaded) {
+				throw new Error('load function must return a value');
+			}
 
 			node.loaded = normalize(loaded);
 			if (node.loaded.stuff) node.stuff = node.loaded.stuff;
@@ -1039,9 +1189,10 @@ class Renderer {
 						stuff
 					});
 
-					const is_leaf = i === a.length - 1;
-
 					if (node && node.loaded) {
+						if (node.loaded.fallthrough) {
+							return;
+						}
 						if (node.loaded.error) {
 							status = node.loaded.status;
 							error = node.loaded.error;
@@ -1058,10 +1209,6 @@ class Renderer {
 						if (node.loaded.stuff) {
 							stuff_changed = true;
 						}
-					} else if (is_leaf && module.load) {
-						// if the leaf node has a `load` function
-						// that returns nothing, fall through
-						return;
 					}
 				} else {
 					node = previous;
@@ -1097,6 +1244,13 @@ class Renderer {
 								continue;
 							}
 
+							if (error_loaded && error_loaded.loaded && error_loaded.loaded.stuff) {
+								stuff = {
+									...stuff,
+									...error_loaded.loaded.stuff
+								};
+							}
+
 							branch = branch.slice(0, j + 1).concat(error_loaded);
 							break load;
 						} catch (e) {
@@ -1122,7 +1276,14 @@ class Renderer {
 			}
 		}
 
-		return await this._get_navigation_result_from_branch({ url, params, branch, status, error });
+		return await this._get_navigation_result_from_branch({
+			url,
+			params,
+			stuff,
+			branch,
+			status,
+			error
+		});
 	}
 
 	/**
@@ -1142,20 +1303,26 @@ class Renderer {
 			params,
 			stuff: {}
 		});
+		const error_node = await this._load_node({
+			status,
+			error,
+			module: await this.fallback[1],
+			url,
+			params,
+			stuff: (node && node.loaded && node.loaded.stuff) || {}
+		});
 
-		const branch = [
-			node,
-			await this._load_node({
-				status,
-				error,
-				module: await this.fallback[1],
-				url,
-				params,
-				stuff: (node && node.loaded && node.loaded.stuff) || {}
-			})
-		];
+		const branch = [node, error_node];
+		const stuff = { ...node?.loaded?.stuff, ...error_node?.loaded?.stuff };
 
-		return await this._get_navigation_result_from_branch({ url, params, branch, status, error });
+		return await this._get_navigation_result_from_branch({
+			url,
+			params,
+			stuff,
+			branch,
+			status,
+			error
+		});
 	}
 }
 
@@ -1202,7 +1369,7 @@ async function start({ paths, target, session, route, spa, trailing_slash, hydra
 		  })
 		: null;
 
-	init(router);
+	init({ router, renderer });
 	set_paths(paths);
 
 	if (hydrate) await renderer.start(hydrate);
