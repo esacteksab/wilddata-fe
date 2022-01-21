@@ -10,19 +10,15 @@ const config = {
 			red: colors.red,
 			blue: colors.blue,
 		},
-		extend: {
-			
-		},
 	},
 	variants: {
 		extend: {
-			backgroundColor: ['checked', 'unchecked'],
-			borderColor: ['checked', 'unchecked'],
-
+			backgroundColor: ['checked'],
+			borderColor: ['checked'],
 		}
 	},
 	plugins: [
-		require('@tailwindcss/forms'),
+		require("@tailwindcss/forms"),
 	],
 };
 
