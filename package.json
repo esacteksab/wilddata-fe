@@ -9,7 +9,7 @@
     "format": "prettier --write ."
   },
   "devDependencies": {
-    "@babel/core": "^7.16.10",
+    "@babel/core": "^7.16.12",
     "@sveltejs/adapter-node": "^1.0.0-next.66",
     "@sveltejs/kit": "^1.0.0-next.236",
     "@typescript-eslint/eslint-plugin": "^5.10.0",
