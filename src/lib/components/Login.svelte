@@ -17,9 +17,7 @@
               rounded-md
               shadow-sm
               focus:ring-2
-              focus:ring-orange-300
-            "
-            placeholder="Username"
+              focus:ring-orange-300"
           />
         </label>
         <label class="block">
@@ -31,12 +29,9 @@
               block
               w-full
               rounded-md
-              shadow-sm 
+              shadow-sm
               focus:ring-2
-              focus:ring-orange-300 
-
-            "
-            placeholder="user@domain.tld"
+              focus:ring-orange-300 "
           />
         </label>
         <label class="block">
@@ -50,13 +45,11 @@
                 rounded-md
                 shadow-sm
                 focus:ring-2
-                focus:ring-orange-300
-                "
-              placeholder="user@domain.tld"
+                focus:ring-orange-300"
             />
           </label>
 
-        
+
         <div class="block">
           <div class="mt-2">
             <div>
@@ -74,12 +67,10 @@
                     checked:bg-orange-300
                     focus:ring
                     focus:ring-offset-0
-                    focus:ring-orange-200
-
-                  "
+                    focus:ring-orange-200"
                   unchecked
                 />
-                <span class="ml-2">Agree to the terms I didn't read.</span>
+                <span class="ml-2">Agree to the <a class="underline" href="/tos">terms</a> I didn't read.</span>
               </label>
             </div>
           </div>
