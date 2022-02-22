@@ -1,18 +1,35 @@
 <script lang="ts">
-  function onSubmit(e) {
-    const formData = new FormData(e.target);
 
-    const data = {};
-    for (let field of formData) {
-      const [key, value] = field;
-      data[key] = value;
+  let username = ''
+  let email = ''
+  let cemail = ''
+  let password = ''
+  let cpassword = ''
+  let result = null
+
+  async function doPost () {
+
+      const res = await fetch(`http://localhost:5000/v1/auth/users`, {
+        method: 'POST',
+        body: JSON.stringify({
+          username,
+          email,
+          cemail,
+          password,
+          cpassword
+        })
+      })
+
+
+    const json = await res.json()
+    result = JSON.stringify(json)
+
+    console.log(result)
     }
-    console.log(data)
-  }
 </script>
 
 <main>
-  <form on:submit|preventDefault={onSubmit}>
+  <form>
     <div class="grid justify-items-stretch text-orange-500">
       <h2 class="text-2xl font-bold justify-self-center text-orange-500">Sign Up!</h2>
       <div class="mt-8 max-w-md justify-self-center">
@@ -23,7 +40,7 @@
               type="text"
               id="username"
               name="username"
-              value=""
+              bind:value={username}
               class="
                 mt-1
                 block
@@ -40,7 +57,7 @@
               type="password"
               id="password"
               name="password"
-              value=""
+              bind:value="{password}"
               class="
                 mt-1
                 block
@@ -57,7 +74,7 @@
               type="password"
               id="cpassword"
               name="cpassword"
-              value=""
+              bind:value="{cpassword}"
               class="
                 mt-1
                 block
@@ -74,7 +91,7 @@
               type="email"
               id="email"
               name="email"
-              value=""
+              bind:value="{email}"
               class="
                 mt-1
                 block
@@ -91,7 +108,7 @@
                 type="email"
                 id="cemail"
                 name="cemail"
-                value=""
+                bind:value="{cemail}"
                 class="
                   mt-1
                   block
@@ -122,14 +139,16 @@
                       focus:ring
                       focus:ring-offset-0
                       focus:ring-orange-200"
-                    unchecked
+
                   />
                   <span class="ml-2">Agree to the <a class="underline" href="/tos">terms</a> I didn't read.</span>
                 </label>
               </div>
             </div>
           </div>
-          <button type="submit">Submit</button>
+          <button type="button" on:click={doPost}>
+            Submit
+          </button>
         </div>
       </div>
     </div>
