@@ -4,7 +4,7 @@
 	 */
 
 	export async function load({ params, fetch, session, context }) {
-		const url = `http://localhost:5000/v1/orgs/${params.name}/assets`;
+		const url = `http://localhost:5000/v1/o/${params.name}/assets`;
 		const res = await fetch(url);
 
         // console.log(url)

@@ -4,7 +4,7 @@
 	 */
 	export async function load({ params, fetch, session }) {
 		// const orgs = `http://localhost:5000/v1/orgs/${url.params}`;
-		const orgs = `http://localhost:5000/v1/orgs/${params.name}`;
+		const orgs = `http://localhost:5000/v1/o/${params.name}`;
 		const res = await fetch(orgs);
 
         // console.log(url)
