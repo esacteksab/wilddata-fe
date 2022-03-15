@@ -1,0 +1,7 @@
+import{S as $,i as x,s as D,e as f,t as c,k as I,c as d,a as w,h as u,d as v,m as S,b as g,g as R,H as a,j as C,I as V}from"../../../chunks/vendor-92567316.js";function U(i){let e,r,s=i[0].Name+"",l,M,q,m,h=i[0].EMail+"",p,A,O,B,n,j,_=i[0].Name+"",E,k,N;return{c(){e=f("main"),r=f("h1"),l=c(s),M=c(" Org"),q=c(`
+
+
+    EMail: `),m=f("b"),p=c(h),A=I(),O=f("br"),B=I(),n=f("a"),j=c("View "),E=c(_),k=c(" Org Assets"),this.h()},l(o){e=d(o,"MAIN",{class:!0});var t=w(e);r=d(t,"H1",{class:!0});var y=w(r);l=u(y,s),M=u(y," Org"),y.forEach(v),q=u(t,`
+
+
+    EMail: `),m=d(t,"B",{});var H=w(m);p=u(H,h),H.forEach(v),A=S(t),O=d(t,"BR",{}),B=S(t),n=d(t,"A",{href:!0,class:!0});var b=w(n);j=u(b,"View "),E=u(b,_),k=u(b," Org Assets"),b.forEach(v),t.forEach(v),this.h()},h(){g(r,"class","text-8xl svelte-1dscqmu"),g(n,"href",N=i[0].Name+"/assets/"),g(n,"class","svelte-1dscqmu"),g(e,"class","svelte-1dscqmu")},m(o,t){R(o,e,t),a(e,r),a(r,l),a(r,M),a(e,q),a(e,m),a(m,p),a(e,A),a(e,O),a(e,B),a(e,n),a(n,j),a(n,E),a(n,k)},p(o,[t]){t&1&&s!==(s=o[0].Name+"")&&C(l,s),t&1&&h!==(h=o[0].EMail+"")&&C(p,h),t&1&&_!==(_=o[0].Name+"")&&C(E,_),t&1&&N!==(N=o[0].Name+"/assets/")&&g(n,"href",N)},i:V,o:V,d(o){o&&v(e)}}}async function G({params:i,fetch:e,session:r}){const s=`http://localhost:5000/v1/o/${i.name}`,l=await e(s);return l.ok?{props:{org:await l.json()}}:{status:l.status,error:new Error(`Could not load ${s}`)}}function z(i,e,r){let{org:s}=e;return i.$$set=l=>{"org"in l&&r(0,s=l.org)},[s]}class J extends ${constructor(e){super();x(this,e,z,U,D,{org:0})}}export{J as default,G as load};
