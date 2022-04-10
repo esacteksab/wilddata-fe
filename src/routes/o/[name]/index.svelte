@@ -24,11 +24,11 @@
 
 <main>
 
-    <h1 class="text-8xl">{org.Name} Org</h1>
+    <h1 class="text-8xl">{org.DisplayName} Org</h1>
 
 
     EMail: <b>{org.EMail}</b> <br/>
-    <a href="{org.Name}/assets/">View {org.Name} Org Assets</a>
+    <a href="{org.Name}/assets/">View {org.DisplayName} Org Assets</a>
 </main>
 
 <style style lang="postcss">
