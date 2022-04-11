@@ -7,9 +7,6 @@
 		const url = `http://localhost:5000/v1/o/${params.name}/assets`;
 		const res = await fetch(url);
 
-        // console.log(url)
-		// console.log(res.json())
-
 		if (res.ok) return { props: { oassets: await res.json()	} };
 		return {
 			status: res.status,
@@ -24,11 +21,11 @@
 
 <main>
 
-	<h1 class="text-8xl">Orgs Assets</h1>
+	<h1 class="text-8xl">Your Org's Assets</h1>
 
 	{#each oassets as asset}
 		<div class="">
-			<b class="bg-gray-200 row-span-full">Asset Name: {asset.Name}</b> <br/>
+			<b class="bg-gray-200 row-span-full">Asset Name:</b> <a href="/a/{asset.Name}">{asset.Name}</a> <br/>
 			{#if asset.Tags}
 			<b class="bg-red-100"> Tags: </b>
 			<ul class="px-2 bg-red-200">
@@ -53,6 +50,10 @@
 		/* @apply text-center; */
 		@apply p-4;
 		@apply mx-auto;
+	}
+
+	a {
+		@apply underline
 	}
 
 	h1 {
