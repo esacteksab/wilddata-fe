@@ -4,10 +4,10 @@
 	 */
 
 	export async function load({ params, fetch, session, context }) {
-		const url = `http://localhost:5000/v1/o/${params.name}/assets`;
-		const res = await fetch(url);
+		const assets = `http://localhost:5000/v1/a/${params.name}`;
+		const res = await fetch(assets);
 
-		if (res.ok) return { props: { oassets: await res.json()	} };
+		if (res.ok) return { props: { iassets: await res.json()	} };
 		return {
 			status: res.status,
 			error: new Error(`Could not load ${url}`)
@@ -16,16 +16,17 @@
 </script>
 
 <script>
-	export let oassets;
+	export let iassets;
 </script>
 
 <main>
 
-	<h1 class="text-8xl">Your Org's Assets</h1>
+	<h1 class="text-8xl">{iassets[0].Name} Details</h1>
 
-	{#each oassets as asset}
+	{#each iassets as asset}
 		<div class="">
-			<b class="bg-gray-200 row-span-full">Asset Name:</b> <a href="/a/{asset.Name}">{asset.Name}</a> <br/>
+			<b class="bg-gray-200 row-span-full">Asset Name:</b> {asset.Name} <br/>
+			<b class="bg-gray-200 row-span-full">Org:</b> {asset.Org} <br/>
 			{#if asset.Tags}
 			<b class="bg-red-100"> Tags: </b>
 			<ul class="px-2 bg-red-200">
@@ -50,10 +51,6 @@
 		/* @apply text-center; */
 		@apply p-4;
 		@apply mx-auto;
-	}
-
-	a {
-		@apply underline
 	}
 
 	h1 {
