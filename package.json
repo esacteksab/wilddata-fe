@@ -14,7 +14,7 @@
     "@sveltejs/adapter-node": "^1.0.0-next.73",
     "@sveltejs/kit": "^1.0.0-next.311",
     "@typescript-eslint/eslint-plugin": "^5.18.0",
-    "@typescript-eslint/parser": "^5.18.0",
+    "@typescript-eslint/parser": "^5.19.0",
     "autoprefixer": "^10.4.4",
     "babel-loader": "^8.2.4",
     "cssnano": "^5.1.7",
