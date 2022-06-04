@@ -1,4 +1,4 @@
-FROM node:14.19.3-buster-slim as base
+FROM node:16.15.0-buster-slim as base
 
 WORKDIR /usr/src/app
 
@@ -11,7 +11,7 @@ COPY . .
 
 RUN npm run build
 
-FROM node:14.19.3-buster-slim
+FROM node:16.15.0-buster-slim
 
 WORKDIR /usr/src/app
 
