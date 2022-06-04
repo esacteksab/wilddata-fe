@@ -3,25 +3,27 @@ export const manifest = {
 	assets: new Set(["favicon.ico","robots.txt"]),
 	mimeTypes: {".ico":"image/vnd.microsoft.icon",".txt":"text/plain"},
 	_: {
-		entry: {"file":"start-9e71f223.js","js":["start-9e71f223.js","chunks/vendor-92567316.js"],"css":[]},
+		entry: {"file":"start-322c978c.js","js":["start-322c978c.js","chunks/index-f46c38f0.js"],"css":[]},
 		nodes: [
 			() => import('./server/nodes/0.js'),
 			() => import('./server/nodes/1.js'),
-			() => import('./server/nodes/2.js'),
-			() => import('./server/nodes/3.js'),
 			() => import('./server/nodes/4.js'),
+			() => import('./server/nodes/3.js'),
 			() => import('./server/nodes/5.js'),
-			() => import('./server/nodes/6.js'),
-			() => import('./server/nodes/7.js'),
 			() => import('./server/nodes/8.js'),
-			() => import('./server/nodes/9.js')
+			() => import('./server/nodes/9.js'),
+			() => import('./server/nodes/10.js'),
+			() => import('./server/nodes/2.js'),
+			() => import('./server/nodes/7.js'),
+			() => import('./server/nodes/6.js')
 		],
 		routes: [
 			{
 				type: 'page',
-				key: "",
+				id: "",
 				pattern: /^\/$/,
-				params: null,
+				names: [],
+				types: [],
 				path: "/",
 				shadow: null,
 				a: [0,2],
@@ -29,9 +31,10 @@ export const manifest = {
 			},
 			{
 				type: 'page',
-				key: "assets",
+				id: "assets",
 				pattern: /^\/assets\/?$/,
-				params: null,
+				names: [],
+				types: [],
 				path: "/assets",
 				shadow: null,
 				a: [0,3],
@@ -39,39 +42,43 @@ export const manifest = {
 			},
 			{
 				type: 'page',
-				key: "signup",
-				pattern: /^\/signup\/?$/,
-				params: null,
-				path: "/signup",
+				id: "login",
+				pattern: /^\/login\/?$/,
+				names: [],
+				types: [],
+				path: "/login",
 				shadow: null,
 				a: [0,4],
 				b: [1]
 			},
 			{
 				type: 'page',
-				key: "login",
-				pattern: /^\/login\/?$/,
-				params: null,
-				path: "/login",
+				id: "orgs",
+				pattern: /^\/orgs\/?$/,
+				names: [],
+				types: [],
+				path: "/orgs",
 				shadow: null,
 				a: [0,5],
 				b: [1]
 			},
 			{
 				type: 'page',
-				key: "orgs",
-				pattern: /^\/orgs\/?$/,
-				params: null,
-				path: "/orgs",
+				id: "signup",
+				pattern: /^\/signup\/?$/,
+				names: [],
+				types: [],
+				path: "/signup",
 				shadow: null,
 				a: [0,6],
 				b: [1]
 			},
 			{
 				type: 'page',
-				key: "tos",
+				id: "tos",
 				pattern: /^\/tos\/?$/,
-				params: null,
+				names: [],
+				types: [],
 				path: "/tos",
 				shadow: null,
 				a: [0,7],
@@ -79,9 +86,10 @@ export const manifest = {
 			},
 			{
 				type: 'page',
-				key: "o/[name]",
-				pattern: /^\/o\/([^/]+?)\/?$/,
-				params: (m) => ({ name: m[1]}),
+				id: "a/[name]",
+				pattern: /^\/a\/([^/]+?)\/?$/,
+				names: ["name"],
+				types: [null],
 				path: null,
 				shadow: null,
 				a: [0,8],
@@ -89,14 +97,30 @@ export const manifest = {
 			},
 			{
 				type: 'page',
-				key: "o/[name]/assets",
-				pattern: /^\/o\/([^/]+?)\/assets\/?$/,
-				params: (m) => ({ name: m[1]}),
+				id: "o/[name]",
+				pattern: /^\/o\/([^/]+?)\/?$/,
+				names: ["name"],
+				types: [null],
 				path: null,
 				shadow: null,
 				a: [0,9],
 				b: [1]
+			},
+			{
+				type: 'page',
+				id: "o/[name]/assets",
+				pattern: /^\/o\/([^/]+?)\/assets\/?$/,
+				names: ["name"],
+				types: [null],
+				path: null,
+				shadow: null,
+				a: [0,10],
+				b: [1]
 			}
-		]
+		],
+		matchers: async () => {
+			
+			return {  };
+		}
 	}
 };

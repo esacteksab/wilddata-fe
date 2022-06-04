@@ -1,26 +1,25 @@
 <script>
-    import { onMount } from "svelte";
-    import Asset from "./Asset.svelte";
-    // define data holding variable
-    export let assets = [];
+  import { onMount } from "svelte";
+  import Asset from "./Asset.svelte";
+  // define data holding variable
+  export let assets = [];
 
-onMount(async () => {
+  onMount(async () => {
     await fetch(`http://localhost:5000/v1/assets`)
-    .then(r => r.json())
-    .then(data => {
+      .then((r) => r.json())
+      .then((data) => {
         assets = data;
-        console.log('json:', data)
-    });
-})
-
+        console.log("json:", data);
+      });
+  });
 </script>
 
 {#if assets}
-    <ul>
-    {#each assets as asset }
-            <Asset {asset} />
+  <ul>
+    {#each assets as asset}
+      <Asset {asset} />
     {/each}
-    </ul>
+  </ul>
 {:else}
-    <p class="loading">loading...</p>
+  <p class="loading">loading...</p>
 {/if}
