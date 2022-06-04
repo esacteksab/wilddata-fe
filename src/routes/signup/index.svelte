@@ -1,10 +1,9 @@
 <script lang="ts">
-    import Signup from '$lib/components/Signup.svelte';
-  </script>
+  import Signup from "$lib/components/Signup.svelte";
+</script>
 
 <main>
-    <div class="container mx-auto">
+  <div class="container mx-auto">
     <Signup name="Signup" />
-    </div>
-
+  </div>
 </main>

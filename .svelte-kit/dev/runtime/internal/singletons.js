@@ -11,8 +11,8 @@ let renderer;
  * }} opts
  */
 function init(opts) {
-	router = opts.router;
-	renderer = opts.renderer;
+  router = opts.router;
+  renderer = opts.renderer;
 }
 
 export { init, renderer, router };

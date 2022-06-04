@@ -20,15 +20,11 @@
     {/if}
   </div>
 </main> -->
-
 <script>
-	import "../app.css";
-	import Header from "$lib/components/Header.svelte";
+  import "../app.css";
+  import Header from "$lib/components/Header.svelte";
 </script>
 
 <Header name="Nav" />
 
-
-<slot>
-
-</slot>
+<slot />
