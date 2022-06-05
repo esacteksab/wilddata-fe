@@ -1,4 +1,4 @@
-export { prerendering } from '../env.js';
+export { prerendering } from "../env.js";
 
 /**
  * @type {import('$app/env').browser}

@@ -1,1 +1,369 @@
-import{S as C,i as D,s as R,e as h,t as k,k as O,c as g,a as p,h as E,d as f,m as q,b as $,g as v,H as _,j as z,n as y,l as F,o as U,p as x,q as G,r as b,w as V,x as J,y as K,z as Q,C as T,M as W}from"../../chunks/index-f46c38f0.js";function X(a){let e,s,l,t,c=a[0].DisplayName+"",n,o,r,i,d,N=a[0].EMail+"",M,w,j,H,P;return{c(){e=h("foo"),s=h("p"),l=h("a"),t=k("Name: "),n=k(c),r=O(),i=h("p"),d=k("EMail: "),M=k(N),w=O(),j=h("br"),H=O(),P=h("hr"),this.h()},l(m){e=g(m,"FOO",{class:!0});var u=p(e);s=g(u,"P",{});var S=p(s);l=g(S,"A",{class:!0,href:!0});var A=p(l);t=E(A,"Name: "),n=E(A,c),A.forEach(f),S.forEach(f),r=q(u),i=g(u,"P",{});var B=p(i);d=E(B,"EMail: "),M=E(B,N),B.forEach(f),w=q(u),j=g(u,"BR",{}),H=q(u),P=g(u,"HR",{}),u.forEach(f),this.h()},h(){$(l,"class","underline text-orange-600"),$(l,"href",o="o/"+a[0].Name),$(e,"class","py-4 text-lg")},m(m,u){v(m,e,u),_(e,s),_(s,l),_(l,t),_(l,n),_(e,r),_(e,i),_(i,d),_(i,M),_(e,w),_(e,j),_(e,H),_(e,P)},p(m,[u]){u&1&&c!==(c=m[0].DisplayName+"")&&z(n,c),u&1&&o!==(o="o/"+m[0].Name)&&$(l,"href",o),u&1&&N!==(N=m[0].EMail+"")&&z(M,N)},i:y,o:y,d(m){m&&f(e)}}}function Y(a,e,s){let{org:l}=e;return a.$$set=t=>{"org"in t&&s(0,l=t.org)},[l]}class Z extends C{constructor(e){super(),D(this,e,Y,X,R,{org:0})}}function I(a,e,s){const l=a.slice();return l[1]=e[s],l}function ee(a){let e,s;return{c(){e=h("p"),s=k("loading..."),this.h()},l(l){e=g(l,"P",{class:!0});var t=p(e);s=E(t,"loading..."),t.forEach(f),this.h()},h(){$(e,"class","loading")},m(l,t){v(l,e,t),_(e,s)},p:y,i:y,o:y,d(l){l&&f(e)}}}function te(a){let e,s,l=a[0],t=[];for(let n=0;n<l.length;n+=1)t[n]=L(I(a,l,n));const c=n=>x(t[n],1,1,()=>{t[n]=null});return{c(){e=h("ul");for(let n=0;n<t.length;n+=1)t[n].c()},l(n){e=g(n,"UL",{});var o=p(e);for(let r=0;r<t.length;r+=1)t[r].l(o);o.forEach(f)},m(n,o){v(n,e,o);for(let r=0;r<t.length;r+=1)t[r].m(e,null);s=!0},p(n,o){if(o&1){l=n[0];let r;for(r=0;r<l.length;r+=1){const i=I(n,l,r);t[r]?(t[r].p(i,o),b(t[r],1)):(t[r]=L(i),t[r].c(),b(t[r],1),t[r].m(e,null))}for(U(),r=l.length;r<t.length;r+=1)c(r);G()}},i(n){if(!s){for(let o=0;o<l.length;o+=1)b(t[o]);s=!0}},o(n){t=t.filter(Boolean);for(let o=0;o<t.length;o+=1)x(t[o]);s=!1},d(n){n&&f(e),W(t,n)}}}function L(a){let e,s;return e=new Z({props:{org:a[1]}}),{c(){J(e.$$.fragment)},l(l){K(e.$$.fragment,l)},m(l,t){Q(e,l,t),s=!0},p(l,t){const c={};t&1&&(c.org=l[1]),e.$set(c)},i(l){s||(b(e.$$.fragment,l),s=!0)},o(l){x(e.$$.fragment,l),s=!1},d(l){T(e,l)}}}function le(a){let e,s,l,t;const c=[te,ee],n=[];function o(r,i){return r[0]?0:1}return e=o(a),s=n[e]=c[e](a),{c(){s.c(),l=F()},l(r){s.l(r),l=F()},m(r,i){n[e].m(r,i),v(r,l,i),t=!0},p(r,[i]){let d=e;e=o(r),e===d?n[e].p(r,i):(U(),x(n[d],1,1,()=>{n[d]=null}),G(),s=n[e],s?s.p(r,i):(s=n[e]=c[e](r),s.c()),b(s,1),s.m(l.parentNode,l))},i(r){t||(b(s),t=!0)},o(r){x(s),t=!1},d(r){n[e].d(r),r&&f(l)}}}function re(a,e,s){let{orgs:l=[]}=e;return V(async()=>{await fetch("http://localhost:5000/v1/orgs").then(t=>t.json()).then(t=>{s(0,l=t),console.log("json:",t)})}),a.$$set=t=>{"orgs"in t&&s(0,l=t.orgs)},[l]}class se extends C{constructor(e){super(),D(this,e,re,le,R,{orgs:0})}}function ne(a){let e,s,l,t,c,n;return c=new se({props:{orgs:a[0]}}),{c(){e=h("h1"),s=k("Orgs"),l=O(),t=h("main"),J(c.$$.fragment),this.h()},l(o){e=g(o,"H1",{class:!0});var r=p(e);s=E(r,"Orgs"),r.forEach(f),l=q(o),t=g(o,"MAIN",{class:!0});var i=p(t);K(c.$$.fragment,i),i.forEach(f),this.h()},h(){$(e,"class","text-8xl svelte-12gtqgd"),$(t,"class","svelte-12gtqgd")},m(o,r){v(o,e,r),_(e,s),v(o,l,r),v(o,t,r),Q(c,t,null),n=!0},p:y,i(o){n||(b(c.$$.fragment,o),n=!0)},o(o){x(c.$$.fragment,o),n=!1},d(o){o&&f(e),o&&f(l),o&&f(t),T(c)}}}function oe(a){let e;return[e]}class ce extends C{constructor(e){super(),D(this,e,oe,ne,R,{})}}export{ce as default};
+import {
+  S as C,
+  i as D,
+  s as R,
+  e as h,
+  t as k,
+  k as O,
+  c as g,
+  a as p,
+  h as E,
+  d as f,
+  m as q,
+  b as $,
+  g as v,
+  H as _,
+  j as z,
+  n as y,
+  l as F,
+  o as U,
+  p as x,
+  q as G,
+  r as b,
+  w as V,
+  x as J,
+  y as K,
+  z as Q,
+  C as T,
+  M as W,
+} from "../../chunks/index-f46c38f0.js";
+function X(a) {
+  let e,
+    s,
+    l,
+    t,
+    c = a[0].DisplayName + "",
+    n,
+    o,
+    r,
+    i,
+    d,
+    N = a[0].EMail + "",
+    M,
+    w,
+    j,
+    H,
+    P;
+  return {
+    c() {
+      (e = h("foo")),
+        (s = h("p")),
+        (l = h("a")),
+        (t = k("Name: ")),
+        (n = k(c)),
+        (r = O()),
+        (i = h("p")),
+        (d = k("EMail: ")),
+        (M = k(N)),
+        (w = O()),
+        (j = h("br")),
+        (H = O()),
+        (P = h("hr")),
+        this.h();
+    },
+    l(m) {
+      e = g(m, "FOO", { class: !0 });
+      var u = p(e);
+      s = g(u, "P", {});
+      var S = p(s);
+      l = g(S, "A", { class: !0, href: !0 });
+      var A = p(l);
+      (t = E(A, "Name: ")),
+        (n = E(A, c)),
+        A.forEach(f),
+        S.forEach(f),
+        (r = q(u)),
+        (i = g(u, "P", {}));
+      var B = p(i);
+      (d = E(B, "EMail: ")),
+        (M = E(B, N)),
+        B.forEach(f),
+        (w = q(u)),
+        (j = g(u, "BR", {})),
+        (H = q(u)),
+        (P = g(u, "HR", {})),
+        u.forEach(f),
+        this.h();
+    },
+    h() {
+      $(l, "class", "underline text-orange-600"),
+        $(l, "href", (o = "o/" + a[0].Name)),
+        $(e, "class", "py-4 text-lg");
+    },
+    m(m, u) {
+      v(m, e, u),
+        _(e, s),
+        _(s, l),
+        _(l, t),
+        _(l, n),
+        _(e, r),
+        _(e, i),
+        _(i, d),
+        _(i, M),
+        _(e, w),
+        _(e, j),
+        _(e, H),
+        _(e, P);
+    },
+    p(m, [u]) {
+      u & 1 && c !== (c = m[0].DisplayName + "") && z(n, c),
+        u & 1 && o !== (o = "o/" + m[0].Name) && $(l, "href", o),
+        u & 1 && N !== (N = m[0].EMail + "") && z(M, N);
+    },
+    i: y,
+    o: y,
+    d(m) {
+      m && f(e);
+    },
+  };
+}
+function Y(a, e, s) {
+  let { org: l } = e;
+  return (
+    (a.$$set = (t) => {
+      "org" in t && s(0, (l = t.org));
+    }),
+    [l]
+  );
+}
+class Z extends C {
+  constructor(e) {
+    super(), D(this, e, Y, X, R, { org: 0 });
+  }
+}
+function I(a, e, s) {
+  const l = a.slice();
+  return (l[1] = e[s]), l;
+}
+function ee(a) {
+  let e, s;
+  return {
+    c() {
+      (e = h("p")), (s = k("loading...")), this.h();
+    },
+    l(l) {
+      e = g(l, "P", { class: !0 });
+      var t = p(e);
+      (s = E(t, "loading...")), t.forEach(f), this.h();
+    },
+    h() {
+      $(e, "class", "loading");
+    },
+    m(l, t) {
+      v(l, e, t), _(e, s);
+    },
+    p: y,
+    i: y,
+    o: y,
+    d(l) {
+      l && f(e);
+    },
+  };
+}
+function te(a) {
+  let e,
+    s,
+    l = a[0],
+    t = [];
+  for (let n = 0; n < l.length; n += 1) t[n] = L(I(a, l, n));
+  const c = (n) =>
+    x(t[n], 1, 1, () => {
+      t[n] = null;
+    });
+  return {
+    c() {
+      e = h("ul");
+      for (let n = 0; n < t.length; n += 1) t[n].c();
+    },
+    l(n) {
+      e = g(n, "UL", {});
+      var o = p(e);
+      for (let r = 0; r < t.length; r += 1) t[r].l(o);
+      o.forEach(f);
+    },
+    m(n, o) {
+      v(n, e, o);
+      for (let r = 0; r < t.length; r += 1) t[r].m(e, null);
+      s = !0;
+    },
+    p(n, o) {
+      if (o & 1) {
+        l = n[0];
+        let r;
+        for (r = 0; r < l.length; r += 1) {
+          const i = I(n, l, r);
+          t[r]
+            ? (t[r].p(i, o), b(t[r], 1))
+            : ((t[r] = L(i)), t[r].c(), b(t[r], 1), t[r].m(e, null));
+        }
+        for (U(), r = l.length; r < t.length; r += 1) c(r);
+        G();
+      }
+    },
+    i(n) {
+      if (!s) {
+        for (let o = 0; o < l.length; o += 1) b(t[o]);
+        s = !0;
+      }
+    },
+    o(n) {
+      t = t.filter(Boolean);
+      for (let o = 0; o < t.length; o += 1) x(t[o]);
+      s = !1;
+    },
+    d(n) {
+      n && f(e), W(t, n);
+    },
+  };
+}
+function L(a) {
+  let e, s;
+  return (
+    (e = new Z({ props: { org: a[1] } })),
+    {
+      c() {
+        J(e.$$.fragment);
+      },
+      l(l) {
+        K(e.$$.fragment, l);
+      },
+      m(l, t) {
+        Q(e, l, t), (s = !0);
+      },
+      p(l, t) {
+        const c = {};
+        t & 1 && (c.org = l[1]), e.$set(c);
+      },
+      i(l) {
+        s || (b(e.$$.fragment, l), (s = !0));
+      },
+      o(l) {
+        x(e.$$.fragment, l), (s = !1);
+      },
+      d(l) {
+        T(e, l);
+      },
+    }
+  );
+}
+function le(a) {
+  let e, s, l, t;
+  const c = [te, ee],
+    n = [];
+  function o(r, i) {
+    return r[0] ? 0 : 1;
+  }
+  return (
+    (e = o(a)),
+    (s = n[e] = c[e](a)),
+    {
+      c() {
+        s.c(), (l = F());
+      },
+      l(r) {
+        s.l(r), (l = F());
+      },
+      m(r, i) {
+        n[e].m(r, i), v(r, l, i), (t = !0);
+      },
+      p(r, [i]) {
+        let d = e;
+        (e = o(r)),
+          e === d
+            ? n[e].p(r, i)
+            : (U(),
+              x(n[d], 1, 1, () => {
+                n[d] = null;
+              }),
+              G(),
+              (s = n[e]),
+              s ? s.p(r, i) : ((s = n[e] = c[e](r)), s.c()),
+              b(s, 1),
+              s.m(l.parentNode, l));
+      },
+      i(r) {
+        t || (b(s), (t = !0));
+      },
+      o(r) {
+        x(s), (t = !1);
+      },
+      d(r) {
+        n[e].d(r), r && f(l);
+      },
+    }
+  );
+}
+function re(a, e, s) {
+  let { orgs: l = [] } = e;
+  return (
+    V(async () => {
+      await fetch("http://localhost:5000/v1/orgs")
+        .then((t) => t.json())
+        .then((t) => {
+          s(0, (l = t)), console.log("json:", t);
+        });
+    }),
+    (a.$$set = (t) => {
+      "orgs" in t && s(0, (l = t.orgs));
+    }),
+    [l]
+  );
+}
+class se extends C {
+  constructor(e) {
+    super(), D(this, e, re, le, R, { orgs: 0 });
+  }
+}
+function ne(a) {
+  let e, s, l, t, c, n;
+  return (
+    (c = new se({ props: { orgs: a[0] } })),
+    {
+      c() {
+        (e = h("h1")),
+          (s = k("Orgs")),
+          (l = O()),
+          (t = h("main")),
+          J(c.$$.fragment),
+          this.h();
+      },
+      l(o) {
+        e = g(o, "H1", { class: !0 });
+        var r = p(e);
+        (s = E(r, "Orgs")),
+          r.forEach(f),
+          (l = q(o)),
+          (t = g(o, "MAIN", { class: !0 }));
+        var i = p(t);
+        K(c.$$.fragment, i), i.forEach(f), this.h();
+      },
+      h() {
+        $(e, "class", "text-8xl svelte-12gtqgd"),
+          $(t, "class", "svelte-12gtqgd");
+      },
+      m(o, r) {
+        v(o, e, r), _(e, s), v(o, l, r), v(o, t, r), Q(c, t, null), (n = !0);
+      },
+      p: y,
+      i(o) {
+        n || (b(c.$$.fragment, o), (n = !0));
+      },
+      o(o) {
+        x(c.$$.fragment, o), (n = !1);
+      },
+      d(o) {
+        o && f(e), o && f(l), o && f(t), T(c);
+      },
+    }
+  );
+}
+function oe(a) {
+  let e;
+  return [e];
+}
+class ce extends C {
+  constructor(e) {
+    super(), D(this, e, oe, ne, R, {});
+  }
+}
+export { ce as default };
