@@ -3,7 +3,7 @@ FROM node:16.15.0-buster-slim as base
 WORKDIR /usr/src/app
 COPY . .
 
-RUN npm ci && npm run build
+RUN npm install && npm ci && npm run build
 
 FROM node:16.15.0-buster-slim
 
