@@ -1,1 +1,1 @@
-export { assets, base } from '../paths.js';
+export { assets, base } from "../paths.js";

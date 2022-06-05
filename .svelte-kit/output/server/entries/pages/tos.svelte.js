@@ -1,4 +1,4 @@
-import { c as create_ssr_component } from "../../chunks/index-7340f048.js";
+import { c as create_ssr_component } from "../../chunks/index-fa0ff56f.js";
 const Tos = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   return `<h1>Terms of Service</h1>
 
