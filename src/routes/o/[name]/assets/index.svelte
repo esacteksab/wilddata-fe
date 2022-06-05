@@ -32,7 +32,7 @@ import Asset from "$lib/Asset.svelte";
 
       <table class="table-auto border-collapse border-orange-600">
         <thead>
-          <tr>
+          <tr class="bg-orange-600">
             <th class="text-left">
               <a href="/a/{asset.Name}">{asset.Name}</a>
             </th>
@@ -44,7 +44,7 @@ import Asset from "$lib/Asset.svelte";
 
         <tbody>
           {#each Object.keys(asset.Tags[0]) as key}
-          <tr>
+          <tr class="even:bg-orange-200 odd:bg-orange-400">
             <td class="pr-4 text-left">
               <b>
                 {key}:
@@ -58,7 +58,6 @@ import Asset from "$lib/Asset.svelte";
               {/each}
             </td>
           </tr>
-          <tr>
 
             {/each}
         </tbody>
