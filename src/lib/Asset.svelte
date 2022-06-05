@@ -5,7 +5,7 @@
 
 <foo class="py-4 text-lg">
   Name: <b><a href="assets/{asset.Name}">{asset.Name}</a></b> <br />
-  Org: <b>{asset.Org}</b> <br />
+  Org: <b><a href="o/{asset.Org}">{asset.Org}</a></b> <br />
   {#if asset.Tags}
     Tags:
     <ul class="px-2 py-4">
