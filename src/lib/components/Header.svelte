@@ -1,5 +1,5 @@
 <nav
-  class="bg-gray-200 border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-800"
+  class="bg-gray-100 border-gray-100 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-800 md:text-orange-500"
 >
   <div class="container flex flex-wrap justify-between mx-auto">
     <a href="/" class="flex justify-items-start">
@@ -46,28 +46,22 @@
         <li>
           <a
             href="/"
-            class="block py-2 pr-4 pl-3 bg-gray-200 rounded md:bg-transparent md:text-orange-500 md:p-0 dark:text-white"
+            class="block py-2 pr-4 pl-3 rounded md:bg-transparent md:p-0 dark:text-white"
             aria-current="page">Home</a
           >
         </li>
         <li>
-          <a
-            href="/orgs"
-            class="block py-2 pr-4 pl-3 text-orange-500 border-b border-gray-100 hover:bg-gray-50 md:hover:bg-transparent md:border-0 md:hover:text-orange-700 md:p-0 dark:text-gray-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700"
-            >Orgs</a
-          >
+          <a href="/orgs" class="block py-2 pr-4 pl-3  md:p-0">Orgs</a>
         </li>
         <li>
-          <a
-            href="/assets"
-            class="block py-2 pr-4 pl-3 text-orange-500 border-b border-gray-100 hover:bg-gray-50 md:hover:bg-transparent md:border-0 md:hover:text-orange-700 md:p-0 dark:text-gray-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700"
+          <a href="/assets" class="block py-2 pr-4 pl-3  md:border-0 md:p-0"
             >Assets</a
           >
         </li>
         <li>
           <a
             href="/signup"
-            class="block py-2 pr-4 pl-3 text-orange-500 border-b border-gray-100 hover:bg-gray-50 md:hover:bg-transparent md:border-0 md:hover:text-orange-700 md:p-0 dark:text-gray-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700"
+            class="block py-2 pr-4 pl-3 text-orange-500 border-b border-gray-100 hover:bg-gray-50 md:hover:bg-transparent md:border-0 md:p-0"
             >Sign Up</a
           >
         </li>

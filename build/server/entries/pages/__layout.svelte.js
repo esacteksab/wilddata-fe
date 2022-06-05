@@ -1,4 +1,7 @@
-import { c as create_ssr_component, v as validate_component } from "../../chunks/index-fa0ff56f.js";
+import {
+  c as create_ssr_component,
+  v as validate_component,
+} from "../../chunks/index-fa0ff56f.js";
 var app = "";
 const Header = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   return `<nav class="${"bg-gray-200 border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-800"}"><div class="${"container flex flex-wrap justify-between mx-auto"}"><a href="${"/"}" class="${"flex justify-items-start"}"><span class="${"items-start text-lg text-orange-500 font-semibold whitespace-nowrap dark:text-white"}">WildData</span></a>
@@ -14,7 +17,12 @@ const _layout = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   return `
 
 
-${validate_component(Header, "Header").$$render($$result, { name: "Nav" }, {}, {})}
+${validate_component(Header, "Header").$$render(
+  $$result,
+  { name: "Nav" },
+  {},
+  {}
+)}
 
 ${slots.default ? slots.default({}) : ``}`;
 });

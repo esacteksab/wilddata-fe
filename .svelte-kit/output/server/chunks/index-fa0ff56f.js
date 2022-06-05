@@ -26,7 +26,7 @@ const escaped = {
   "'": "&#39;",
   "&": "&amp;",
   "<": "&lt;",
-  ">": "&gt;"
+  ">": "&gt;",
 };
 function escape(html) {
   return String(html).replace(/["'&<>]/g, (match) => escaped[match]);
@@ -42,13 +42,14 @@ function each(items, fn) {
   return str;
 }
 const missing_component = {
-  $$render: () => ""
+  $$render: () => "",
 };
 function validate_component(component, name) {
   if (!component || !component.$$render) {
-    if (name === "svelte:component")
-      name += " this={...}";
-    throw new Error(`<${name}> is not a valid SSR component. You may need to review your build config to ensure that dependencies are compiled, rather than imported as pre-compiled modules`);
+    if (name === "svelte:component") name += " this={...}";
+    throw new Error(
+      `<${name}> is not a valid SSR component. You may need to review your build config to ensure that dependencies are compiled, rather than imported as pre-compiled modules`
+    );
   }
   return component;
 }
@@ -58,11 +59,13 @@ function create_ssr_component(fn) {
     const parent_component = current_component;
     const $$ = {
       on_destroy,
-      context: new Map(context || (parent_component ? parent_component.$$.context : [])),
+      context: new Map(
+        context || (parent_component ? parent_component.$$.context : [])
+      ),
       on_mount: [],
       before_update: [],
       after_update: [],
-      callbacks: blank_object()
+      callbacks: blank_object(),
     };
     set_current_component({ $$ });
     const html = fn(result, props, bindings, slots);
@@ -70,7 +73,10 @@ function create_ssr_component(fn) {
     return html;
   }
   return {
-    render: (props = {}, { $$slots = {}, context = /* @__PURE__ */ new Map() } = {}) => {
+    render: (
+      props = {},
+      { $$slots = {}, context = /* @__PURE__ */ new Map() } = {}
+    ) => {
       on_destroy = [];
       const result = { title: "", head: "", css: /* @__PURE__ */ new Set() };
       const html = $$render(result, props, {}, $$slots, context);
@@ -78,19 +84,31 @@ function create_ssr_component(fn) {
       return {
         html,
         css: {
-          code: Array.from(result.css).map((css) => css.code).join("\n"),
-          map: null
+          code: Array.from(result.css)
+            .map((css) => css.code)
+            .join("\n"),
+          map: null,
         },
-        head: result.title + result.head
+        head: result.title + result.head,
       };
     },
-    $$render
+    $$render,
   };
 }
 function add_attribute(name, value, boolean) {
-  if (value == null || boolean && !value)
-    return "";
-  const assignment = boolean && value === true ? "" : `="${escape_attribute_value(value.toString())}"`;
+  if (value == null || (boolean && !value)) return "";
+  const assignment =
+    boolean && value === true
+      ? ""
+      : `="${escape_attribute_value(value.toString())}"`;
   return ` ${name}${assignment}`;
 }
-export { each as a, add_attribute as b, create_ssr_component as c, escape as e, missing_component as m, setContext as s, validate_component as v };
+export {
+  each as a,
+  add_attribute as b,
+  create_ssr_component as c,
+  escape as e,
+  missing_component as m,
+  setContext as s,
+  validate_component as v,
+};

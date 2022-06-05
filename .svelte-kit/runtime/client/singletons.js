@@ -7,7 +7,7 @@ let client;
  * }} opts
  */
 function init(opts) {
-	client = opts.client;
+  client = opts.client;
 }
 
 export { client, init };

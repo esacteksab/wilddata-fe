@@ -7,6 +7,7 @@ const config = {
       orange: colors.orange,
       red: colors.red,
       blue: colors.blue,
+      gray: colors.gray,
     },
   },
   variants: {
