@@ -47,4 +47,6 @@ node_modules
 _actual*.*
 _output
 /types
-build
+/.svelte-kit
+/build
+/functions
