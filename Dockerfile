@@ -2,8 +2,8 @@ FROM node:16.15.0-buster-slim as base
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
-COPY *.*js ./
+COPY package*.json .
+COPY *.*js .
 
 RUN npm ci
 
