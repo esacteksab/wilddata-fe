@@ -3,9 +3,17 @@
   let assets;
 </script>
 
-<h1 class="text-8xl">Assets</h1>
 <main>
-  <Assets {assets} />
+  <div class=" grid grid-cols-10 gap-5 content-start">
+    <div class="col-start-2 col-span-3">
+      <h1>Foo</h1>
+    </div>
+    <div class="col-start-2 col-span-3 mx-1">
+      <Assets {assets} />
+    </div>
+  </div>
+
+
 </main>
 
 <style style lang="postcss">
@@ -16,13 +24,13 @@
   }
 
   h1 {
-    @apply text-red-600;
+    @apply text-orange-600;
     @apply uppercase;
     @apply text-6xl;
     @apply font-thin;
     @apply leading-tight;
-    @apply my-16 mx-auto;
-    @apply max-w-xs;
+    @apply my-1;
+    @apply mx-1;
   }
 
   @screen sm {

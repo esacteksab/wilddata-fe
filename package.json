@@ -39,6 +39,7 @@
   "type": "module",
   "dependencies": {
     "@fontsource/fira-mono": "4.5.8",
-    "cookie": "0.4.2"
+    "cookie": "0.4.2",
+    "tw-elements": "^1.0.0-alpha12"
   }
 }
