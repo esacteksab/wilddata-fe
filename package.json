@@ -19,9 +19,9 @@
     "@sveltejs/kit": "next",
     "@tailwindcss/forms": "0.5.2",
     "@tsconfig/svelte": "3.0.0",
-    "@types/cookie": "0.4.1",
-    "@typescript-eslint/eslint-plugin": "5.27.0",
-    "@typescript-eslint/parser": "5.27.0",
+    "@types/cookie": "0.5.1",
+    "@typescript-eslint/eslint-plugin": "5.27.1",
+    "@typescript-eslint/parser": "5.27.1",
     "autoprefixer": "10.4.7",
     "eslint": "8.17.0",
     "eslint-config-prettier": "8.5.0",
@@ -32,14 +32,14 @@
     "svelte": "3.48.0",
     "svelte-check": "2.7.2",
     "svelte-preprocess": "4.10.7",
-    "tailwindcss": "3.0.24",
+    "tailwindcss": "3.1.2",
     "tslib": "2.4.0",
-    "typescript": "4.6.4"
+    "typescript": "4.7.3"
   },
   "type": "module",
   "dependencies": {
     "@fontsource/fira-mono": "4.5.8",
-    "cookie": "0.4.2",
+    "cookie": "0.5.0",
     "tw-elements": "1.0.0-alpha12"
   }
 }
