@@ -25,7 +25,7 @@
   import Header from "$lib/components/Header.svelte";
 </script>
 
-<Header name="Nav" />
+<Header />
 
 <div class="w-40 h-full shadow-md bg-white px-1 absolute">
   <ul class="relative">
