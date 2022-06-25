@@ -3,7 +3,6 @@
   let orgs;
 </script>
 
-
 <main>
   <div class=" grid grid-cols-10 gap-5 content-start">
     <div class="col-start-2 col-span-3">
@@ -13,8 +12,6 @@
       <Orgs {orgs} />
     </div>
   </div>
-
-
 </main>
 
 <style style lang="postcss">

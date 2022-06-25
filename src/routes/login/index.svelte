@@ -1,25 +1,23 @@
 <script>
-let Name = ''
-let Password = ''
-let error;
+  let Name = "";
+  let Password = "";
+  let error;
 
-export async function doPost() {
+  export async function doPost() {
+    const res = await fetch(`http://localhost:5000/v1/login`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ Name, Password }),
+    });
 
-const res = await fetch(`http://localhost:5000/v1/login`, {
-  method: "POST",
-  headers: {
-    "accept": 'application/json',
-    "content-type": 'application/json'
-  },
-  body: JSON.stringify({Name, Password})
-});
-
-if (!res.ok) {
-    error = (await res.json()).message;
-    return;
-
-}
-}
+    if (!res.ok) {
+      error = (await res.json()).message;
+      return;
+    }
+  }
 </script>
 
 <div>
@@ -70,7 +68,6 @@ if (!res.ok) {
     </div>
   </form>
   {#if error}
-  <p class='mt-3 text-red-500 text-center font-semibold'>{error}</p>
-{/if}
+    <p class="mt-3 text-red-500 text-center font-semibold">{error}</p>
+  {/if}
 </div>
-

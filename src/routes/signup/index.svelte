@@ -4,6 +4,6 @@
 
 <main>
   <div class="container mx-auto">
-    <Signup name="Signup" />
+    <Signup />
   </div>
 </main>

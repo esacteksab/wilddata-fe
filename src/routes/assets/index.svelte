@@ -12,8 +12,6 @@
       <Assets {assets} />
     </div>
   </div>
-
-
 </main>
 
 <style style lang="postcss">

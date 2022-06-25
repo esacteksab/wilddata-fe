@@ -4,8 +4,8 @@ export const manifest = {
   mimeTypes: { ".ico": "image/vnd.microsoft.icon", ".txt": "text/plain" },
   _: {
     entry: {
-      file: "start-322c978c.js",
-      js: ["start-322c978c.js", "chunks/index-f46c38f0.js"],
+      file: "start-5bebf018.js",
+      js: ["start-5bebf018.js", "chunks/index-9dae82f1.js"],
       css: [],
     },
     nodes: [

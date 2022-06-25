@@ -32,21 +32,20 @@ const Orgs = create_ssr_component(($$result, $$props, $$bindings, slots) => {
       : `<p class="${"loading"}">loading...</p>`
   }`;
 });
-var index_svelte_svelte_type_style_lang = "";
+var index_svelte_svelte_type_style_lang = /* @__PURE__ */ (() =>
+  "main.svelte-1c8jvid{padding:1rem;margin-left:auto;margin-right:auto}h1.svelte-1c8jvid{--tw-text-opacity:1;color:rgb(234 88 12 / var(--tw-text-opacity));text-transform:uppercase;font-size:3.75rem;font-weight:100;line-height:1.25;margin-top:0.25rem;margin-bottom:0.25rem;margin-left:0.25rem;margin-right:0.25rem}@media(min-width: 640px){h1.svelte-1c8jvid{max-width:none}}")();
 const css = {
-  code: "main.svelte-12gtqgd{padding:1rem;margin-left:auto;margin-right:auto}h1.svelte-12gtqgd{--tw-text-opacity:1;color:rgb(234 88 12 / var(--tw-text-opacity));text-transform:uppercase;font-size:3.75rem;font-weight:100;line-height:1.25;margin-top:4rem;margin-bottom:4rem;margin-left:auto;margin-right:auto;max-width:20rem}@media(min-width: 640px){h1.svelte-12gtqgd{max-width:none}}",
+  code: "main.svelte-1c8jvid{padding:1rem;margin-left:auto;margin-right:auto}h1.svelte-1c8jvid{--tw-text-opacity:1;color:rgb(234 88 12 / var(--tw-text-opacity));text-transform:uppercase;font-size:3.75rem;font-weight:100;line-height:1.25;margin-top:0.25rem;margin-bottom:0.25rem;margin-left:0.25rem;margin-right:0.25rem}@media(min-width: 640px){h1.svelte-1c8jvid{max-width:none}}",
   map: null,
 };
 const Orgs_1 = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let orgs;
   $$result.css.add(css);
-  return `<h1 class="${"text-8xl svelte-12gtqgd"}">Orgs</h1>
-<main class="${"svelte-12gtqgd"}">${validate_component(Orgs, "Orgs").$$render(
-    $$result,
-    { orgs },
-    {},
-    {}
-  )}
+  return `<main class="${"svelte-1c8jvid"}"><div class="${"grid grid-cols-10 gap-5 content-start"}"><div class="${"col-start-2 col-span-3"}"><h1 class="${"svelte-1c8jvid"}">Orgs</h1></div>
+    <div class="${"col-start-2 col-span-3 mx-1"}">${validate_component(
+    Orgs,
+    "Orgs"
+  ).$$render($$result, { orgs }, {}, {})}</div></div>
 </main>`;
 });
 export { Orgs_1 as default };

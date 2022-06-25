@@ -42,7 +42,8 @@
     <div class="hidden w-full md:block md:w-auto" id="mobile-menu">
       <ul
         class="flex flex-col mt-4 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium"
-      ><li>
+      >
+        <li>
           <a
             href="/signup"
             class="block py-2 pr-4 pl-3 text-orange-500 border-b border-gray-100 hover:bg-gray-50 md:hover:bg-transparent md:border-0 md:p-0"
@@ -58,9 +59,5 @@
         </li> -->
       </ul>
     </div>
-
-
-
-
   </div>
 </nav>

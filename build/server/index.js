@@ -1,40 +1,3 @@
-var __defProp = Object.defineProperty;
-var __defProps = Object.defineProperties;
-var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
-var __getOwnPropSymbols = Object.getOwnPropertySymbols;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __propIsEnum = Object.prototype.propertyIsEnumerable;
-var __defNormalProp = (obj, key2, value) =>
-  key2 in obj
-    ? __defProp(obj, key2, {
-        enumerable: true,
-        configurable: true,
-        writable: true,
-        value,
-      })
-    : (obj[key2] = value);
-var __spreadValues = (a, b) => {
-  for (var prop in b || (b = {}))
-    if (__hasOwnProp.call(b, prop)) __defNormalProp(a, prop, b[prop]);
-  if (__getOwnPropSymbols)
-    for (var prop of __getOwnPropSymbols(b)) {
-      if (__propIsEnum.call(b, prop)) __defNormalProp(a, prop, b[prop]);
-    }
-  return a;
-};
-var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
-var __objRest = (source, exclude) => {
-  var target = {};
-  for (var prop in source)
-    if (__hasOwnProp.call(source, prop) && exclude.indexOf(prop) < 0)
-      target[prop] = source[prop];
-  if (source != null && __getOwnPropSymbols)
-    for (var prop of __getOwnPropSymbols(source)) {
-      if (exclude.indexOf(prop) < 0 && __propIsEnum.call(source, prop))
-        target[prop] = source[prop];
-    }
-  return target;
-};
 import {
   c as create_ssr_component,
   s as setContext,
@@ -838,7 +801,7 @@ class Csp {
   #style_src;
   constructor({ mode, directives }, { dev, prerender, needs_nonce }) {
     this.#use_hashes = mode === "hash" || (mode === "auto" && prerender);
-    this.#directives = dev ? __spreadValues({}, directives) : directives;
+    this.#directives = dev ? { ...directives } : directives;
     this.#dev = dev;
     const d = this.#directives;
     if (dev) {
@@ -889,7 +852,7 @@ class Csp {
   }
   get_header(is_meta = false) {
     const header = [];
-    const directives = __spreadValues({}, this.#directives);
+    const directives = { ...this.#directives };
     if (this.#style_src.length > 0) {
       directives["style-src"] = [
         ...(directives["style-src"] || directives["default-src"] || []),
@@ -932,9 +895,10 @@ class Csp {
     return `<meta http-equiv="content-security-policy" content=${content}>`;
   }
 }
-const updated = __spreadProps(__spreadValues({}, readable(false)), {
+const updated = {
+  ...readable(false),
   check: () => false,
-});
+};
 async function render_response({
   branch,
   options,
@@ -989,12 +953,13 @@ async function render_response({
       stores: {
         page: writable(null),
         navigating: writable(null),
-        session: __spreadProps(__spreadValues({}, session), {
+        session: {
+          ...session,
           subscribe: (fn) => {
             is_private = (cache == null ? void 0 : cache.private) ?? true;
             return session.subscribe(fn);
           },
-        }),
+        },
         updated,
       },
       page: {
@@ -1188,9 +1153,7 @@ function serialize_error(error2) {
   let serialized = try_serialize(error2);
   if (!serialized) {
     const { name, message, stack } = error2;
-    serialized = try_serialize(
-      __spreadProps(__spreadValues({}, error2), { name, message, stack })
-    );
+    serialized = try_serialize({ ...error2, name, message, stack });
   }
   if (!serialized) {
     serialized = "{}";
@@ -1605,6 +1568,13 @@ function normalize_path(path, trailing_slash) {
   }
   return path;
 }
+class LoadURL extends URL {
+  get hash() {
+    throw new Error(
+      "url.hash is inaccessible from load. Consider accessing hash from the page store within the script tag of your component."
+    );
+  }
+}
 function domain_matches(hostname, constraint) {
   if (!constraint) return true;
   const normalized = constraint[0] === "." ? constraint.slice(1) : constraint;
@@ -1661,7 +1631,7 @@ async function load_node({
     const load_input = {
       url: state.prerendering
         ? create_prerendering_url_proxy(event.url)
-        : event.url,
+        : new LoadURL(event.url),
       params: event.params,
       props: shadow.body || {},
       routeId: event.routeId,
@@ -1680,20 +1650,18 @@ async function load_node({
           requested = resource;
         } else {
           requested = resource.url;
-          opts = __spreadValues(
-            {
-              method: resource.method,
-              headers: resource.headers,
-              body: resource.body,
-              mode: resource.mode,
-              credentials: resource.credentials,
-              cache: resource.cache,
-              redirect: resource.redirect,
-              referrer: resource.referrer,
-              integrity: resource.integrity,
-            },
-            opts
-          );
+          opts = {
+            method: resource.method,
+            headers: resource.headers,
+            body: resource.body,
+            mode: resource.mode,
+            credentials: resource.credentials,
+            cache: resource.cache,
+            redirect: resource.redirect,
+            referrer: resource.referrer,
+            integrity: resource.integrity,
+            ...opts,
+          };
         }
         opts.headers = new Headers(opts.headers);
         for (const [key2, value] of event.request.headers) {
@@ -1735,7 +1703,7 @@ async function load_node({
           if (opts.credentials !== "omit") {
             uses_credentials = true;
             const authorization = event.request.headers.get("authorization");
-            const combined_cookies = __spreadValues({}, cookies);
+            const combined_cookies = { ...cookies };
             for (const cookie2 of new_cookies) {
               if (!domain_matches(event.url.hostname, cookie2.domain)) continue;
               if (!path_matches(resolved, cookie2.path)) continue;
@@ -1755,14 +1723,12 @@ async function load_node({
             throw new Error("Request body must be a string");
           }
           response = await respond(
-            new Request(
-              new URL(requested, event.url).href,
-              __spreadValues({}, opts)
-            ),
+            new Request(new URL(requested, event.url).href, { ...opts }),
             options,
-            __spreadProps(__spreadValues({}, state), {
+            {
+              ...state,
               initiator: route,
-            })
+            }
           );
           if (state.prerendering) {
             dependency = { response, body: null };
@@ -1851,7 +1817,7 @@ async function load_node({
         });
         return proxy;
       },
-      stuff: __spreadValues({}, stuff),
+      stuff: { ...stuff },
       status: is_error ? status ?? null : null,
       error: is_error ? error2 ?? null : null,
     };
@@ -1894,9 +1860,7 @@ async function load_node({
     stuff: loaded.stuff || stuff,
     fetched,
     set_cookie_headers: new_cookies.map((new_cookie) => {
-      const _a = new_cookie,
-        { name, value } = _a,
-        options2 = __objRest(_a, ["name", "value"]);
+      const { name, value, ...options2 } = new_cookie;
       return serialize_1(name, value, options2);
     }),
     uses_credentials,
@@ -1966,7 +1930,7 @@ async function load_shadow_data(route, event, options, prerender) {
             : headers.location;
         return data;
       }
-      data.body = __spreadValues(__spreadValues({}, body), data.body);
+      data.body = { ...body, ...data.body };
     }
     return data;
   } catch (e) {
@@ -2076,19 +2040,18 @@ async function respond$1(opts) {
   const { event, options, state, $session, route, resolve_opts } = opts;
   let nodes;
   if (!resolve_opts.ssr) {
-    return await render_response(
-      __spreadProps(__spreadValues({}, opts), {
-        branch: [],
-        page_config: {
-          hydrate: true,
-          router: true,
-        },
-        status: 200,
-        error: null,
-        event,
-        stuff: {},
-      })
-    );
+    return await render_response({
+      ...opts,
+      branch: [],
+      page_config: {
+        hydrate: true,
+        router: true,
+      },
+      status: 200,
+      error: null,
+      event,
+      stuff: {},
+    });
   }
   try {
     nodes = await Promise.all(
@@ -2128,14 +2091,13 @@ async function respond$1(opts) {
       let loaded;
       if (node) {
         try {
-          loaded = await load_node(
-            __spreadProps(__spreadValues({}, opts), {
-              node,
-              stuff,
-              is_error: false,
-              is_leaf: i === nodes.length - 1,
-            })
-          );
+          loaded = await load_node({
+            ...opts,
+            node,
+            stuff,
+            is_error: false,
+            is_leaf: i === nodes.length - 1,
+          });
           set_cookie_headers = set_cookie_headers.concat(
             loaded.set_cookie_headers
           );
@@ -2173,25 +2135,21 @@ async function respond$1(opts) {
                 j -= 1;
               }
               try {
-                const error_loaded = await load_node(
-                  __spreadProps(__spreadValues({}, opts), {
-                    node: error_node,
-                    stuff: node_loaded.stuff,
-                    is_error: true,
-                    is_leaf: false,
-                    status,
-                    error: error2,
-                  })
-                );
+                const error_loaded = await load_node({
+                  ...opts,
+                  node: error_node,
+                  stuff: node_loaded.stuff,
+                  is_error: true,
+                  is_leaf: false,
+                  status,
+                  error: error2,
+                });
                 if (error_loaded.loaded.error) {
                   continue;
                 }
                 page_config = get_page_config(error_node.module, options);
                 branch = branch.slice(0, j + 1).concat(error_loaded);
-                stuff = __spreadValues(
-                  __spreadValues({}, node_loaded.stuff),
-                  error_loaded.stuff
-                );
+                stuff = { ...node_loaded.stuff, ...error_loaded.stuff };
                 break ssr;
               } catch (err) {
                 const e = coalesce_to_error(err);
@@ -2215,34 +2173,35 @@ async function respond$1(opts) {
         }
       }
       if (loaded && loaded.loaded.stuff) {
-        stuff = __spreadValues(__spreadValues({}, stuff), loaded.loaded.stuff);
+        stuff = {
+          ...stuff,
+          ...loaded.loaded.stuff,
+        };
       }
     }
   }
   try {
     return with_cookies(
-      await render_response(
-        __spreadProps(__spreadValues({}, opts), {
-          stuff,
-          event,
-          page_config,
-          status,
-          error: error2,
-          branch: branch.filter(Boolean),
-        })
-      ),
+      await render_response({
+        ...opts,
+        stuff,
+        event,
+        page_config,
+        status,
+        error: error2,
+        branch: branch.filter(Boolean),
+      }),
       set_cookie_headers
     );
   } catch (err) {
     const error3 = coalesce_to_error(err);
     options.handle_error(error3, event);
     return with_cookies(
-      await respond_with_error(
-        __spreadProps(__spreadValues({}, opts), {
-          status: 500,
-          error: error3,
-        })
-      ),
+      await respond_with_error({
+        ...opts,
+        status: 500,
+        error: error3,
+      }),
       set_cookie_headers
     );
   }
@@ -2503,9 +2462,10 @@ async function respond(request, options, state) {
             status: 200,
             error: null,
             branch: [],
-            resolve_opts: __spreadProps(__spreadValues({}, resolve_opts), {
+            resolve_opts: {
+              ...resolve_opts,
               ssr: false,
-            }),
+            },
           });
         }
         if (route) {
@@ -2626,9 +2586,9 @@ function set_paths(paths) {
 }
 function set_prerendering(value) {}
 const template = ({ head, body, assets: assets2, nonce }) =>
-  '<!DOCTYPE html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8" />\n    <link rel="icon" href="/favicon.ico" />\n    <meta name="viewport" content="width=device-width, initial-scale=1" />\n    ' +
+  '<!DOCTYPE html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8" />\n    <script src="./TW-ELEMENTS-PATH/dist/js/index.min.js"></script>\n    <link rel="icon" href="/favicon.ico" />\n    <meta name="viewport" content="width=device-width, initial-scale=1" />\n    ' +
   head +
-  '\n  </head>\n  <body class="bg-gray-200">\n    <div id="svelte">' +
+  '\n  </head>\n  <body class="bg-gray-100">\n    <div id="svelte">' +
   body +
   "</div>\n  </body>\n</html>\n";
 let read = null;
