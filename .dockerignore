@@ -4,3 +4,7 @@ node_modules
 .github
 README.md
 .envrc
+Makefile
+Dockerfile
+renovate.json
+.editorconfig
