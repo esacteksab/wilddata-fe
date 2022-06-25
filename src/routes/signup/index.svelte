@@ -14,7 +14,14 @@
         accept: "application/json",
         "content-type": "application/json",
       },
-      body: JSON.stringify({ name,  email, cemail, vemail, password, cpassword }),
+      body: JSON.stringify({
+        name,
+        email,
+        cemail,
+        vemail,
+        password,
+        cpassword,
+      }),
     });
 
     if (!res.ok) {
@@ -138,13 +145,14 @@
               Agree to the <a class="underline " href="/tos">terms</a> I didn't read.
             </span>
           </label>
-          <button type="submit" class="border-solid text-white"> Submit </button>
+          <button type="submit" class="border-solid text-white">
+            Submit
+          </button>
         </div>
       </div>
     </div>
     {#if error}
-    <p class="mt-3 text-red-500 text-center font-semibold">{error}</p>
-  {/if}
+      <p class="mt-3 text-red-500 text-center font-semibold">{error}</p>
+    {/if}
   </form>
-
 </div>
