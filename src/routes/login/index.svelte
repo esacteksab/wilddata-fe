@@ -1,9 +1,9 @@
 <script>
   let Name = "";
   let Password = "";
-  let error;
+  let errors = [];
 
-  export async function doPost() {
+  export async function submit() {
     const res = await fetch(`http://localhost:5000/v1/login`, {
       method: "POST",
       headers: {
@@ -13,15 +13,23 @@
       body: JSON.stringify({ Name, Password }),
     });
 
+    if (res.ok) {
+      // get response payload
+      const resp = await res.json();
+      return res.ok;
+    }
+
     if (!res.ok) {
-      error = (await res.json()).message;
-      return;
+      // get response payload
+      const resp = await res.json();
+      errors = resp.error;
+      return errors;
     }
   }
 </script>
 
 <div>
-  <form on:submit|preventDefault={doPost}>
+  <form on:submit|preventDefault={submit}>
     <div class="grid justify-items-stretch text-orange-500">
       <h2 class="text-2xl font-bold justify-self-center text-orange-500">
         Log In!
@@ -67,7 +75,7 @@
       </div>
     </div>
   </form>
-  {#if error}
-    <p class="mt-3 text-red-500 text-center font-semibold">{error}</p>
+  {#if errors}
+    <p class="mt-3 text-red-500 text-center font-semibold">{errors}</p>
   {/if}
 </div>
