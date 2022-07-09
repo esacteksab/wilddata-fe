@@ -5,7 +5,7 @@ COPY . .
 
 RUN npm install && npm ci && npm run build
 
-FROM node:16.15.1-buster-slim
+FROM base as build
 
 WORKDIR /usr/src/app
 
