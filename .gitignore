@@ -1,6 +1,7 @@
 *.db
 *.docker_build/
 node_modules/*
+.npmrc
 
 # Binaries for programs and plugins
 *.exe
