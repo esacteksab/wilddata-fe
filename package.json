@@ -2,7 +2,7 @@
   "name": "wilddatafe",
   "version": "0.5.0",
   "scripts": {
-    "dev": "vite dev",
+    "dev": "vite dev --port 3000",
     "build": "vite build --config vite.config.js",
     "package": "svelte-kit package",
     "preview": "vite preview",
@@ -42,6 +42,5 @@
     "@fontsource/fira-mono": "4.5.8",
     "cookie": "0.5.0",
     "tw-elements": "1.0.0-alpha12"
-
   }
 }
