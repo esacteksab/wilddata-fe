@@ -3,8 +3,8 @@ lockfileVersion: 5.4
 specifiers:
   '@fontsource/fira-mono': 4.5.8
   '@playwright/test': 1.23.3
-  '@sveltejs/adapter-node': next
-  '@sveltejs/kit': next
+  '@sveltejs/adapter-node': 1.0.0-next.81
+  '@sveltejs/kit': 1.0.0-next.377
   '@tailwindcss/forms': 0.5.2
   '@tsconfig/svelte': 3.0.0
   '@types/cookie': 0.5.1
@@ -26,13 +26,11 @@ specifiers:
   tw-elements: 1.0.0-alpha12
   typescript: 4.7.4
   vite: 3.0.0
-  yarn: ^1.22.19
 
 dependencies:
   '@fontsource/fira-mono': 4.5.8
   cookie: 0.5.0
   tw-elements: 1.0.0-alpha12
-  yarn: 1.22.19
 
 devDependencies:
   '@playwright/test': 1.23.3
@@ -1935,10 +1933,3 @@ packages:
   /yaml/1.10.2:
     resolution: {integrity: sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg==}
     engines: {node: '>= 6'}
-
-  /yarn/1.22.19:
-    resolution: {integrity: sha512-/0V5q0WbslqnwP91tirOvldvYISzaqhClxzyUKXYxs07yUILIs5jx/k6CFe8bvKSkds5w+eiOqta39Wk3WxdcQ==}
-    engines: {node: '>=4.0.0'}
-    hasBin: true
-    requiresBuild: true
-    dev: false
