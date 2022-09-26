@@ -1,4 +1,4 @@
-FROM node:16.17.0-buster-slim as base
+FROM node:16.17.1-buster-slim as base
 
 WORKDIR /usr/src/app
 COPY . .
