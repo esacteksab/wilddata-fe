@@ -4,7 +4,7 @@ specifiers:
   '@fontsource/fira-mono': 4.5.10
   '@playwright/test': 1.28.1
   '@sveltejs/adapter-node': 1.0.0-next.101
-  '@sveltejs/kit': 1.0.0-next.561
+  '@sveltejs/kit': 1.0.0-next.562
   '@tailwindcss/forms': 0.5.3
   '@tsconfig/svelte': 3.0.0
   '@types/cookie': 0.5.1
@@ -35,7 +35,7 @@ dependencies:
 devDependencies:
   '@playwright/test': 1.28.1
   '@sveltejs/adapter-node': 1.0.0-next.101
-  '@sveltejs/kit': 1.0.0-next.561_svelte@3.53.1+vite@3.2.4
+  '@sveltejs/kit': 1.0.0-next.562_svelte@3.53.1+vite@3.2.4
   '@tailwindcss/forms': 0.5.3_tailwindcss@3.2.4
   '@tsconfig/svelte': 3.0.0
   '@types/cookie': 0.5.1
@@ -241,8 +241,8 @@ packages:
       rollup: 2.79.1
     dev: true
 
-  /@sveltejs/kit/1.0.0-next.561_svelte@3.53.1+vite@3.2.4:
-    resolution: {integrity: sha512-N8HQvS6gcm7R78ADfM4xjhuFS3Ir+Ezce3De8WOnISXQ1tS2npc5LMH9LRHHi14nfosAfJ7vUlcLwLE6N/I7+Q==}
+  /@sveltejs/kit/1.0.0-next.562_svelte@3.53.1+vite@3.2.4:
+    resolution: {integrity: sha512-VgJzjtfjVLW/4A/vDtURc10PrS3bb/N62LHzqLZcUNb5+eN4a0k5cayC7Hz2tmtvrb2Qsg+piEAogvqjKBxrOg==}
     engines: {node: '>=16.14'}
     hasBin: true
     requiresBuild: true
