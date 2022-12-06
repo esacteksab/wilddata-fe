@@ -19,7 +19,7 @@
     "@tailwindcss/forms": "0.5.3",
     "@tsconfig/svelte": "3.0.0",
     "@types/cookie": "0.5.1",
-    "@typescript-eslint/eslint-plugin": "5.45.0",
+    "@typescript-eslint/eslint-plugin": "5.45.1",
     "@typescript-eslint/parser": "5.45.0",
     "autoprefixer": "10.4.13",
     "eslint": "8.29.0",
