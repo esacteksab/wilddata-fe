@@ -13,7 +13,7 @@
     "format": "prettier --write --plugin-search-dir=. ."
   },
   "devDependencies": {
-    "@playwright/test": "1.28.1",
+    "@playwright/test": "1.29.1",
     "@sveltejs/adapter-node": "1.0.0-next.104",
     "@sveltejs/kit": "1.0.0-next.578",
     "@tailwindcss/forms": "0.5.3",
