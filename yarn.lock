@@ -544,6 +544,13 @@ braces@^3.0.2, braces@~3.0.2:
   dependencies:
     fill-range "^7.0.1"
 
+browser-tabs-lock@^1.2.14:
+  version "1.2.15"
+  resolved "https://registry.yarnpkg.com/browser-tabs-lock/-/browser-tabs-lock-1.2.15.tgz#d5012e652e2a0cb4eba471b0a2300c2fa5d92788"
+  integrity sha512-J8K9vdivK0Di+b8SBdE7EZxDr88TnATing7XoLw6+nFkXMQ6sVBh92K3NQvZlZU91AIkFRi0w3sztk5Z+vsswA==
+  dependencies:
+    lodash ">=4.17.21"
+
 browserslist@^4.21.4:
   version "4.21.4"
   resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.21.4.tgz#e7496bbc67b9e39dd0f98565feccdcb0d4ff6987"
@@ -1270,6 +1277,11 @@ lodash.merge@^4.6.2:
   resolved "https://registry.yarnpkg.com/lodash.merge/-/lodash.merge-4.6.2.tgz#558aa53b43b661e1925a0afdfa36a9a1085fe57a"
   integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
 
+lodash@>=4.17.21:
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
+  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
+
 lru-cache@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-6.0.0.tgz#6d6fe6570ebd96aaf90fcad1dafa3b2566db3a94"
@@ -1749,6 +1761,27 @@ strip-json-comments@^3.1.0, strip-json-comments@^3.1.1:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-3.1.1.tgz#31f1281b3832630434831c310c01cccda8cbe006"
   integrity sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==
+
+supertokens-js-override@0.0.4, supertokens-js-override@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/supertokens-js-override/-/supertokens-js-override-0.0.4.tgz#9af583fbc5e1f0195dbb358c4fcf75f44c76dc09"
+  integrity sha512-r0JFBjkMIdep3Lbk3JA+MpnpuOtw4RSyrlRAbrzMcxwiYco3GFWl/daimQZ5b1forOiUODpOlXbSOljP/oyurg==
+
+supertokens-web-js@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/supertokens-web-js/-/supertokens-web-js-0.3.0.tgz#0549588d294e941ca7465ea7bbfbb235a4792b14"
+  integrity sha512-OWQt+KCzNrssmBOoMRDdQZ3TGM00HO98i0eQDANJKJbNOaJ+I80mCNV3i8dWLqO1AOClzPAt5oLJNimPjCn9TA==
+  dependencies:
+    supertokens-js-override "0.0.4"
+    supertokens-website "^14.0.0"
+
+supertokens-website@^14.0.0:
+  version "14.0.3"
+  resolved "https://registry.yarnpkg.com/supertokens-website/-/supertokens-website-14.0.3.tgz#ba6681c9e2e95667c38d6c8f6dcb719a8424527b"
+  integrity sha512-W/IvK1RjLbthunsMfq0gd9yeYZMGY00yncZ2Csh5kns435PbAr0hp+eKzQehOP/pO/Kmd3qM8GzA0Fod3k4D4A==
+  dependencies:
+    browser-tabs-lock "^1.2.14"
+    supertokens-js-override "^0.0.4"
 
 supports-color@^7.1.0:
   version "7.2.0"
