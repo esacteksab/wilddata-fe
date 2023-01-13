@@ -258,10 +258,10 @@
     "@rollup/plugin-node-resolve" "^15.0.1"
     rollup "^3.7.0"
 
-"@sveltejs/kit@1.0.10":
-  version "1.0.10"
-  resolved "https://registry.yarnpkg.com/@sveltejs/kit/-/kit-1.0.10.tgz#f3a2eba4e9b5a16c6e92d139c4ca135b460c1a94"
-  integrity sha512-8rlj7fFleKv7NEmn48iKsmbrnuopFMslqBB/RVwS3/+3Oo1gsNiTxIJlub9w43Rxd4sxQWCY/4p12X5Yiro3aw==
+"@sveltejs/kit@1.0.11":
+  version "1.0.11"
+  resolved "https://registry.yarnpkg.com/@sveltejs/kit/-/kit-1.0.11.tgz#f806aeac40b821c151395e9cc2ec7a21da7df19a"
+  integrity sha512-FcbR2/jlKtSfFBXwnqgpWnoOG54foLQB2esdkkdz7uei0+KnK5ulWZw0lJbMzXTy7kfxRvH1spxlXoBpPizUqg==
   dependencies:
     "@sveltejs/vite-plugin-svelte" "^2.0.0"
     "@types/cookie" "^0.5.1"
@@ -1814,10 +1814,10 @@ svelte-preprocess@^4.0.0:
     sorcery "^0.10.0"
     strip-indent "^3.0.0"
 
-svelte@3.55.0:
-  version "3.55.0"
-  resolved "https://registry.yarnpkg.com/svelte/-/svelte-3.55.0.tgz#29cb958750a23e751309a6535ccd811fcabc9038"
-  integrity sha512-uGu2FVMlOuey4JoKHKrpZFkoYyj0VLjJdz47zX5+gVK5odxHM40RVhar9/iK2YFRVxvfg9FkhfVlR0sjeIrOiA==
+svelte@3.55.1:
+  version "3.55.1"
+  resolved "https://registry.yarnpkg.com/svelte/-/svelte-3.55.1.tgz#6f93b153e5248039906ce5fe196efdb9e05dfce8"
+  integrity sha512-S+87/P0Ve67HxKkEV23iCdAh/SX1xiSfjF1HOglno/YTbSTW7RniICMCofWGdJJbdjw3S+0PfFb1JtGfTXE0oQ==
 
 tailwindcss@3.2.4:
   version "3.2.4"
