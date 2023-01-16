@@ -248,20 +248,20 @@
     estree-walker "^2.0.2"
     picomatch "^2.3.1"
 
-"@sveltejs/adapter-node@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@sveltejs/adapter-node/-/adapter-node-1.1.0.tgz#adddd5bb22c8671c1169c573963ef8e0100c8d17"
-  integrity sha512-br/KlTI24/TFOuQ+SmoTSfwzgWjslGXkSreOYALW8ElVsG8dAh8stDM07hDZjtQQ46r6snd2tev89Sagh8ZOtA==
+"@sveltejs/adapter-node@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@sveltejs/adapter-node/-/adapter-node-1.1.1.tgz#c1adfad3437c5e0b9b257954a4e61a8d3f300274"
+  integrity sha512-APCKDP3fE6iMYMqIL0ba0KI5T8ctuztSqx9lb+GTKWGlw3Rk74utiR9NiegkHUj6VJuBRhhVc+0Fh7AraJpMUg==
   dependencies:
     "@rollup/plugin-commonjs" "^24.0.0"
     "@rollup/plugin-json" "^6.0.0"
     "@rollup/plugin-node-resolve" "^15.0.1"
     rollup "^3.7.0"
 
-"@sveltejs/kit@1.0.11":
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/@sveltejs/kit/-/kit-1.0.11.tgz#f806aeac40b821c151395e9cc2ec7a21da7df19a"
-  integrity sha512-FcbR2/jlKtSfFBXwnqgpWnoOG54foLQB2esdkkdz7uei0+KnK5ulWZw0lJbMzXTy7kfxRvH1spxlXoBpPizUqg==
+"@sveltejs/kit@1.0.12":
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/@sveltejs/kit/-/kit-1.0.12.tgz#4bc6b72867cbcf59a0aa986e5585f63e51d3a080"
+  integrity sha512-+ltedUTLuGIuWJX5TuVeY9pclckFMf/TnaylKD14xDM6zOd2JLGOprAvGuInuqqfgFGF503uMPlPMnzgGrM5Ew==
   dependencies:
     "@sveltejs/vite-plugin-svelte" "^2.0.0"
     "@types/cookie" "^0.5.1"
@@ -275,7 +275,7 @@
     set-cookie-parser "^2.5.1"
     sirv "^2.0.2"
     tiny-glob "^0.2.9"
-    undici "5.14.0"
+    undici "5.15.0"
 
 "@sveltejs/vite-plugin-svelte@^2.0.0":
   version "2.0.2"
@@ -1948,10 +1948,10 @@ typescript@*, typescript@4.9.4:
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.9.4.tgz#a2a3d2756c079abda241d75f149df9d561091e78"
   integrity sha512-Uz+dTXYzxXXbsFpM86Wh3dKCxrQqUcVMxwU54orwlJjOpO3ao8L7j5lH+dWfTwgCwIuM9GQ2kvVotzYJMXTBZg==
 
-undici@5.14.0:
-  version "5.14.0"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-5.14.0.tgz#1169d0cdee06a4ffdd30810f6228d57998884d00"
-  integrity sha512-yJlHYw6yXPPsuOH0x2Ib1Km61vu4hLiRRQoafs+WUgX1vO64vgnxiCEN9dpIrhZyHFsai3F0AEj4P9zy19enEQ==
+undici@5.15.0:
+  version "5.15.0"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-5.15.0.tgz#cb8437c43718673a8be59df0fdd4856ff6689283"
+  integrity sha512-wCAZJDyjw9Myv+Ay62LAoB+hZLPW9SmKbQkbHIhMw/acKSlpn7WohdMUc/Vd4j1iSMBO0hWwU8mjB7a5p5bl8g==
   dependencies:
     busboy "^1.6.0"
 
