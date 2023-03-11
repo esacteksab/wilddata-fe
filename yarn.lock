@@ -255,20 +255,20 @@
     estree-walker "^2.0.2"
     picomatch "^2.3.1"
 
-"@sveltejs/adapter-node@1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@sveltejs/adapter-node/-/adapter-node-1.2.1.tgz#59ddc495684dab423e8bfb367c2f2bbcfe8ac463"
-  integrity sha512-mEGDCaZVU3qvFdUI8CMKv+BSzpBYpTpcx85u8bfJ+vcv57pu4UXjZg7ivOoxWZdunUeqq4oEyE+kHmlgBRAalg==
+"@sveltejs/adapter-node@1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@sveltejs/adapter-node/-/adapter-node-1.2.2.tgz#014d2fad84b19b1c02e176a9eaa56adce81b372a"
+  integrity sha512-HA+QPRve97ZAQfZ0wkHjtoSR9ilyYZV82T7zRgzm2WJ0rIpAgyRYf6K7KNwiCq23KKkN0hZHY5elNyCnVz8zrA==
   dependencies:
     "@rollup/plugin-commonjs" "^24.0.0"
     "@rollup/plugin-json" "^6.0.0"
     "@rollup/plugin-node-resolve" "^15.0.1"
     rollup "^3.7.0"
 
-"@sveltejs/kit@1.10.0":
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/@sveltejs/kit/-/kit-1.10.0.tgz#17d3565e5903f6d2c0730197fd875c2cf921ad01"
-  integrity sha512-0P35zHrByfbF3Ym3RdQL+RvzgsCDSyO3imSwuZ67XAD5HoCQFF3a8Mhh0V3sObz3rc5aJd4Qn82UpAihJqZ6gQ==
+"@sveltejs/kit@1.11.0":
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/@sveltejs/kit/-/kit-1.11.0.tgz#23f233c351e5956356ba6f3206e40637c5f5dbda"
+  integrity sha512-PwViZcMoLgEU/jhLoSyjf5hSrHS67wvSm0ifBo4prP9irpGa5HuPOZeVDTL5tPDSBoKxtdYi1zlGdoiJfO86jA==
   dependencies:
     "@sveltejs/vite-plugin-svelte" "^2.0.0"
     "@types/cookie" "^0.5.1"
