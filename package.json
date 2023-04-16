@@ -15,7 +15,7 @@
   "devDependencies": {
     "@playwright/test": "1.32.3",
     "@sveltejs/adapter-node": "1.2.3",
-    "@sveltejs/kit": "1.15.4",
+    "@sveltejs/kit": "1.15.5",
     "@tailwindcss/forms": "0.5.3",
     "@tsconfig/svelte": "3.0.0",
     "@types/cookie": "0.5.1",
