@@ -149,10 +149,10 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.41.0.tgz#080321c3b68253522f7646b55b577dd99d2950b3"
   integrity sha512-LxcyMGxwmTh2lY9FwHPGWOHmYFCZvbrFCBZL4FzSSsxsRPuhrYUg/49/0KDfW8tnIEaEHtfmn6+NPN+1DqaNmA==
 
-"@fontsource/fira-mono@5.0.1":
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/@fontsource/fira-mono/-/fira-mono-5.0.1.tgz#f908d88e1f09e4d0eeba1398db6c3c541aa19453"
-  integrity sha512-SXd96npOQV9g7pYjUzLcvRIvlK8p6Oo6bsMZS+3uGqH8y8GFXa+EpjVLBA7ee9s2xdM13Ln2mZb2Qi4UcuBXhA==
+"@fontsource/fira-mono@5.0.2":
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/@fontsource/fira-mono/-/fira-mono-5.0.2.tgz#8edd29c4fabb27ee255b1c6a3b42e2808354f868"
+  integrity sha512-Ip/jwYe54KA57tCHScCVcSPTpSZXpUorUrelioICTy1DQMckZVc8MAtWSmajuVXuLIOn66hEy2yJ2iyRXGmjVQ==
 
 "@humanwhocodes/config-array@^0.11.8":
   version "0.11.8"
@@ -773,9 +773,9 @@ doctrine@^3.0.0:
     esutils "^2.0.2"
 
 dotenv@^16.0.3:
-  version "16.0.3"
-  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.0.3.tgz#115aec42bac5053db3c456db30cc243a5a836a07"
-  integrity sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==
+  version "16.1.3"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.1.3.tgz#0c67e90d0ddb48d08c570888f709b41844928210"
+  integrity sha512-FYssxsmCTtKL72fGBSvb1K9dRz0/VZeWqFme/vSb7r7323x4CRaHu4LvQ5JG3+s6yt2YPbBrkpiEODktfyjI9A==
 
 electron-to-chromium@^1.4.284:
   version "1.4.328"
