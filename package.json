@@ -41,6 +41,6 @@
     "@fontsource/fira-mono": "5.0.8",
     "cookie": "0.5.0",
     "dotenv": "^16.0.3",
-    "tw-elements": "1.0.0-beta3"
+    "tw-elements": "1.0.0-rc.1"
   }
 }
