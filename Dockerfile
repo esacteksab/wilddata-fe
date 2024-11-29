@@ -1,4 +1,4 @@
-FROM node:18.20.4-bullseye-slim as base
+FROM node:18.20.5-bullseye-slim as base
 
 WORKDIR /usr/src/app
 COPY . .
